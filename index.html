@@ -1,0 +1,2910 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-dark-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basement Reserve - Cellar Catalog</title>
+    
+    <!-- Tailwind CSS -->
+    <script>
+        // Suppress Tailwind CDN production warning
+        const _warn = console.warn.bind(console);
+        console.warn = (...args) => {
+            if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+            _warn(...args);
+        };
+        // Suppress blocked remote CSS errors
+        const _error = console.error.bind(console);
+        console.error = (...args) => {
+            const msg = typeof args[0] === 'string' ? args[0] : '';
+            if (msg.includes('cssRules') || msg.includes('remote css') || msg.includes('remote stylesheet') || msg.includes('fonts.googleapis')) return;
+            _error(...args);
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts via @import (avoids CORS/fetch blocking) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+    </style>
+
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        merlot: {
+                            50: '#fdf2f4',
+                            100: '#fbe5e9',
+                            200: '#f7ced6',
+                            300: '#f1a7b7',
+                            400: '#e7758f',
+                            500: '#d4496b',
+                            600: '#be3053',
+                            700: '#a0203f',
+                            800: '#851c36',
+                            900: '#711a30',
+                            950: '#410a18',
+                        },
+                        gold: {
+                            50: '#fbfaf3',
+                            100: '#f6f3df',
+                            200: '#ede6be',
+                            300: '#dfd292',
+                            400: '#cfb864',
+                            500: '#c0a041',
+                            600: '#a78332',
+                            700: '#8b6529',
+                            800: '#735025',
+                            900: '#614221',
+                            950: '#382210',
+                        },
+                        dark: {
+                            800: '#1a1415',
+                            900: '#120b0c',
+                            950: '#0b0506',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['DM Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar styling for high-end boutique feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0506;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #410a18;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #851c36;
+        }
+        .laser-line {
+            animation: scan 2.1s linear infinite;
+        }
+        @keyframes scan {
+            0%, 100% { top: 0%; }
+            50% { top: 100%; }
+        }
+    </style>
+</head>
+<body class="h-full text-gray-100 flex flex-col font-sans overflow-hidden bg-dark-950">
+
+    <!-- Toast system wrapper -->
+    <div id="toast-wrapper" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
+
+    <!-- Custom Luxury Confirmation Modal Overlay (Eliminates confirm/alert blocks) -->
+    <div id="custom-confirm-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bg-dark-850 border border-merlot-900/40 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-6">
+            <div class="flex items-center gap-4 text-gold-400">
+                <div class="h-12 w-12 rounded-full bg-merlot-950 flex items-center justify-center border border-merlot-800">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 17v-1m0-4a2 2 0 10-2-2"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-serif text-lg font-bold text-white tracking-wide">Confirm Action</h4>
+                    <p class="text-[10px] text-gold-400/80 tracking-wider uppercase font-semibold">Basement Reserve Security</p>
+                </div>
+            </div>
+            <p id="confirm-modal-text" class="text-xs text-gray-300 leading-relaxed"></p>
+            <div class="flex justify-end gap-3 pt-2">
+                <button id="btn-confirm-cancel" class="px-4 py-2 border border-merlot-950 text-gray-400 hover:text-white rounded-xl text-xs font-semibold transition-all">
+                    Cancel
+                </button>
+                <button id="btn-confirm-accept" class="px-5 py-2 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold shadow-md shadow-merlot-950">
+                    Confirm Action
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="bg-dark-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="flex items-center justify-between p-6 border-b border-gray-800">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-gold-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <h2 class="font-sans text-lg font-bold text-white">Settings</h2>
+                </div>
+                <button onclick="closeSettingsModal()" class="text-gray-500 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-6 overflow-y-auto max-h-[80vh]">
+                <!-- Govee -->
+                <div class="space-y-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Govee Sensor</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Connect your H5179 to display live cellar temperature & humidity on the dashboard.</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Govee API Key</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="settings-govee-key" placeholder="Paste your Govee API key"
+                                class="flex-1 bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                            <button onclick="toggleGoveeKeyVisibility()" class="px-3 py-2 bg-dark-800 border border-gray-700 rounded-xl text-gray-500 hover:text-white transition-colors">
+                                <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="govee-status-msg" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
+                    <button onclick="saveGoveeKey()" class="w-full py-2.5 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold border border-gold-500/20 transition-all active:scale-95">
+                        Save & Connect
+                    </button>
+                </div>
+                <!-- GitHub Sync -->
+                <div class="border-t border-gray-800 pt-5 space-y-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">GitHub Sync</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Automatically push updates to your GitHub Pages site after each session.</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">GitHub Username</label>
+                        <input type="text" id="settings-github-user" placeholder="e.g. iamdanluis"
+                            class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Repository Name</label>
+                        <input type="text" id="settings-github-repo" placeholder="e.g. Basement-Reserve"
+                            class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Personal Access Token</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="settings-github-token" placeholder="Paste your GitHub token"
+                                class="flex-1 bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                            <button onclick="toggleTokenVisibility()" class="px-3 py-2 bg-dark-800 border border-gray-700 rounded-xl text-gray-500 hover:text-white transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="github-status-msg" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
+                    <button onclick="saveGitHubSettings()" class="w-full py-2.5 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                        Save GitHub Settings
+                    </button>
+                </div>
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Google Image Search</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Auto-fetch wine bottle photos. Requires a Google Custom Search API key and Search Engine ID.</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Google API Key</label>
+                        <input type="password" id="settings-google-key" placeholder="Paste your Google API key"
+                            class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Search Engine ID (cx)</label>
+                        <input type="text" id="settings-google-cx" placeholder="e.g. 36fa0880c0d7349cc"
+                            class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                    </div>
+                    <button onclick="saveGoogleKeys()" class="w-full py-2.5 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                        Save Google Settings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <div class="flex flex-col h-full w-full overflow-hidden">
+        
+        <!-- Top Navigation Bar (desktop + mobile) -->
+        <header class="bg-dark-900 border-b border-merlot-950 flex-shrink-0">
+            <div class="flex items-center justify-between px-4 md:px-8 h-14 gap-4">
+                <!-- Brand -->
+                <div class="flex items-center gap-2.5 flex-shrink-0">
+                    <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-merlot-700 to-merlot-900 flex items-center justify-center border border-gold-500/30 shadow-md">
+                        <svg class="w-4 h-4 text-gold-400" fill="currentColor" viewBox="0 0 24 24"><path d="M18.7 3H5.3C4 3 3.3 4.3 4 5.4L9 13.1V19H7v2h10v-2h-2v-5.9l5-7.7C20.7 4.3 20 3 18.7 3z"/></svg>
+                    </div>
+                    <div class="hidden sm:block">
+                        <h1 class="font-serif text-base font-bold text-white leading-tight tracking-wide">Basement Reserve</h1>
+                        <p class="text-[9px] text-gold-400 tracking-widest uppercase font-semibold leading-none">Cellar Catalog</p>
+                    </div>
+                </div>
+
+                <!-- Desktop nav tabs -->
+                <nav class="hidden md:flex items-center gap-1 flex-1 justify-center">
+                    <button id="btn-tab-dashboard" onclick="switchTab('dashboard')"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 bg-merlot-900 text-white">
+                        <svg class="w-4 h-4 text-gold-400" fill="currentColor" viewBox="0 0 24 24"><path d="M11 2H3a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1zm0 10H3a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-8a1 1 0 00-1-1zm10-10h-8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1zm0 10h-8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-8a1 1 0 00-1-1z"/></svg>
+                        Dashboard
+                    </button>
+                    <button id="btn-tab-catalog" onclick="switchTab('catalog')"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-800 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                        Catalog
+                    </button>
+                    <button id="btn-tab-rack" onclick="switchTab('rack')"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-800 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                        Rack Map
+                    </button>
+                    <button id="btn-tab-sommelier" onclick="switchTab('sommelier')"
+                        class="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-800 transition-all duration-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        Sommelier
+                    </button>
+                </nav>
+
+                <!-- Right side actions -->
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <button onclick="openAddWineModal()"
+                        class="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-lg text-xs font-bold border border-gold-500/20 transition-all active:scale-95">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 4v16m8-8H4"/></svg>
+                        <span class="hidden sm:inline">Add Bottle</span>
+                        <span class="sm:hidden">Add</span>
+                    </button>
+                    <button onclick="openSettingsModal()" class="p-2 text-gray-500 hover:text-white bg-dark-900 border border-gray-800 rounded-lg transition-colors" title="Settings">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                    <button onclick="pushToGitHub()" id="btn-github-push" class="hidden items-center gap-1.5 px-3 py-2 bg-dark-900 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white rounded-lg text-xs font-bold transition-all active:scale-95" title="Push to GitHub Pages">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        <span class="hidden sm:inline">Push to GitHub</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile nav tab row -->
+            <nav class="flex md:hidden border-t border-merlot-950/60">
+                <button id="mob-tab-dashboard" onclick="switchTab('dashboard')" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-white bg-merlot-900/60">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M11 2H3a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1zm0 10H3a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-8a1 1 0 00-1-1zm10-10h-8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1zm0 10h-8a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1v-8a1 1 0 00-1-1z"/></svg>
+                    <span class="text-[9px] font-semibold uppercase tracking-wider">Dashboard</span>
+                </button>
+                <button id="mob-tab-catalog" onclick="switchTab('catalog')" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    <span class="text-[9px] font-semibold uppercase tracking-wider">Catalog</span>
+                </button>
+                <button id="mob-tab-rack" onclick="switchTab('rack')" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span class="text-[9px] font-semibold uppercase tracking-wider">Rack</span>
+                </button>
+                <button id="mob-tab-sommelier" onclick="switchTab('sommelier')" class="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    <span class="text-[9px] font-semibold uppercase tracking-wider">Sommelier</span>
+                </button>
+            </nav>
+        </header>
+
+            <!-- Main Content Area Container -->
+            <main class="flex-grow overflow-y-auto p-6 md:p-8 space-y-8 bg-gradient-to-b from-dark-900 to-dark-950">
+
+                <!-- Tab: Dashboard Section -->
+                <section id="tab-dashboard" class="space-y-8">
+                    <!-- Greeting Block -->
+                    <div>
+                        <h2 class="font-serif text-3xl font-bold text-white tracking-wide">Basement Reserve Cellar Catalog</h2>
+                        <p class="text-sm text-gray-400 mt-1">Private reserve collection including cataloged high-fidelity Oregon boutique labels.</p>
+                    </div>
+
+                    <!-- Statistics grid row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+                        <!-- Stat card: Total Bottles -->
+                        <div class="bg-dark-800 p-6 rounded-2xl border border-merlot-950/20 shadow-lg relative overflow-hidden group transition-all hover:border-merlot-900/40">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Total Bottles</p>
+                            <p id="stat-total-bottles" class="text-3xl font-serif font-bold text-white mt-1.5">0</p>
+                        </div>
+
+                        <!-- Stat card: Est Value -->
+                        <div class="bg-dark-800 p-6 rounded-2xl border border-merlot-950/20 shadow-lg relative overflow-hidden group transition-all hover:border-merlot-900/40">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Cellar Value</p>
+                            <p id="stat-total-value" class="text-3xl font-serif font-bold text-white mt-1.5">$0</p>
+                        </div>
+
+                        <!-- Stat card: Regions -->
+                        <div class="bg-dark-800 p-6 rounded-2xl border border-merlot-950/20 shadow-lg relative overflow-hidden group transition-all hover:border-merlot-900/40">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">AVAs & Regions</p>
+                            <p id="stat-regions" class="text-3xl font-serif font-bold text-white mt-1.5">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Cellar Conditions Widget -->
+                    <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
+                        <div class="p-5 flex items-center justify-between border-b border-gray-800/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-950/60 border border-blue-700/40 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1-.3-3.4 1.3a11.5 11.5 0 00-6.2 0C6.5 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-sans text-base font-bold text-white leading-tight">Cellar Conditions</h3>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">Live temperature & humidity via Govee H5179</p>
+                                </div>
+                            </div>
+                            <button onclick="fetchGoveeReadings()" id="btn-refresh-govee" class="text-[10px] text-gray-500 hover:text-gold-400 font-bold bg-dark-900 border border-gray-800 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Refresh
+                            </button>
+                        </div>
+
+                        <div class="p-5">
+                            <!-- Loading -->
+                            <div id="govee-loading" class="flex items-center gap-2 text-[11px] text-gray-500">
+                                <svg class="w-3.5 h-3.5 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                Connecting to sensor...
+                            </div>
+
+                            <!-- Readings -->
+                            <div id="govee-readings" class="hidden grid grid-cols-2 gap-4">
+                                <!-- Temperature -->
+                                <div class="bg-dark-900 rounded-xl border border-gray-800 p-4 space-y-2">
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Temperature</p>
+                                    <p id="govee-temp" class="text-3xl font-bold text-white">--°F</p>
+                                    <div id="govee-temp-status" class="text-[10px] font-semibold"></div>
+                                    <div class="w-full h-1 rounded-full bg-dark-800 overflow-hidden">
+                                        <div id="govee-temp-bar" class="h-full rounded-full transition-all duration-700" style="width:0%"></div>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">Ideal: 55°F</p>
+                                </div>
+                                <!-- Humidity -->
+                                <div class="bg-dark-900 rounded-xl border border-gray-800 p-4 space-y-2">
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Humidity</p>
+                                    <p id="govee-humidity" class="text-3xl font-bold text-white">--%</p>
+                                    <div id="govee-humidity-status" class="text-[10px] font-semibold"></div>
+                                    <div class="w-full h-1 rounded-full bg-dark-800 overflow-hidden">
+                                        <div id="govee-humidity-bar" class="h-full rounded-full transition-all duration-700" style="width:0%"></div>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">Ideal: 60–70%</p>
+                                </div>
+                            </div>
+
+                            <!-- Error -->
+                            <div id="govee-error" class="hidden text-[11px] text-gray-500 space-y-1">
+                                <p id="govee-error-msg"></p>
+                                <p class="text-[10px] text-gray-600">Check your API key or sensor connection.</p>
+                            </div>
+
+                            <!-- Last updated -->
+                            <p id="govee-updated" class="hidden text-[9px] text-gray-700 mt-3"></p>
+                        </div>
+                    </div>
+
+                    <!-- Ready to Drink Widget -->
+                    <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
+                        <div class="p-5 flex items-center justify-between border-b border-gray-800/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-green-950/60 border border-green-700/40 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-serif text-base font-bold text-white leading-tight">Ready to Drink Now</h3>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">Bottles at or near peak drinking window</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="rtd-count-pill" class="px-2.5 py-1 rounded-full bg-green-950/60 border border-green-700/40 text-green-300 text-[10px] font-bold">0 bottles</span>
+                                <button onclick="scanCellarDrinkWindows()" id="btn-scan-cellar" class="text-[10px] text-gold-400 hover:text-gold-300 font-bold bg-dark-900 border border-gold-950 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 3l1.5 1.5M3 5l1.5 1.5M12 3v2m0 14v2M3 12H1m20 0h-2M5.5 18.5L4 20M18.5 5.5L20 4M19 19l-7-7 2-2 7 7-2 2z"/></svg>
+                                    Scan Cellar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Carousel -->
+                        <div class="relative">
+                            <!-- Empty state -->
+                            <div id="rtd-empty" class="p-8 text-center">
+                                <p class="text-xs text-gray-500">Click <strong class="text-gray-400">Scan Cellar</strong> to analyze your collection's drinking windows.</p>
+                            </div>
+
+                            <!-- Scanning progress -->
+                            <div id="rtd-scanning" class="hidden p-6 text-center space-y-3">
+                                <svg class="w-5 h-5 animate-spin text-gold-400 mx-auto" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                <p id="rtd-scan-status" class="text-[11px] text-gray-400">Analyzing cellar...</p>
+                                <div class="w-full bg-dark-900 rounded-full h-1.5 overflow-hidden">
+                                    <div id="rtd-scan-bar" class="h-full bg-gold-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Carousel track -->
+                            <div id="rtd-carousel-wrap" class="hidden">
+                                <div id="rtd-carousel" class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory p-5 pb-4 scrollbar-hide" style="-webkit-overflow-scrolling:touch; scrollbar-width:none;">
+                                    <!-- cards injected here -->
+                                </div>
+                                <!-- Nav arrows (desktop) -->
+                                <button onclick="rtdScroll(-1)" class="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-dark-900/90 border border-gray-700 rounded-full items-center justify-center text-gray-400 hover:text-white transition-colors z-10">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <button onclick="rtdScroll(1)" class="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 bg-dark-900/90 border border-gray-700 rounded-full items-center justify-center text-gray-400 hover:text-white transition-colors z-10">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Graphic charts and suggestions row -->
+                    <div class="grid grid-cols-1 gap-6">
+                        <!-- Card: Style Distribution -->
+                        <div class="bg-dark-800 rounded-2xl border border-merlot-950/10 p-6 shadow-lg flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-serif text-lg font-bold text-white mb-1">Style Distribution</h3>
+                                <p class="text-xs text-gray-400 mb-4">Percentage and share of varieties</p>
+                            </div>
+                            <div id="distribution-list" class="space-y-4 my-2">
+                                <!-- Dynamic JS insertion -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab: Catalog Section -->
+                <section id="tab-catalog" class="space-y-6 hidden">
+                    <!-- Catalog Toolbar with live searches -->
+                    <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center">
+                        <div>
+                            <h2 class="font-serif text-2xl font-bold text-white">Private Collection Catalog</h2>
+                            <p class="text-xs text-gray-400 mt-1">Live search, filter varieties and scan files</p>
+                        </div>
+                        
+                        <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+                            <!-- Live search bar -->
+                            <div class="relative flex-grow lg:flex-grow-0 lg:w-64">
+                                <svg class="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+                                <input id="catalog-search" oninput="filterCatalog()" type="text" placeholder="Search winery, style, notes..." class="w-full bg-dark-850 border border-merlot-950/40 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold-500/50 focus:ring-1 focus:ring-gold-500/20 transition-all">
+                            </div>
+
+                            <!-- Filter: Styles -->
+                            <select id="filter-type" onchange="filterCatalog()" class="bg-dark-850 border border-merlot-950/40 rounded-xl px-4 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 transition-all cursor-pointer">
+                                <option value="all">All Styles</option>
+                                <option value="Red">Red Wines</option>
+                                <option value="White">White Wines</option>
+                                <option value="Sparkling">Sparkling Wines</option>
+                                <option value="Rosé">Rosé Wines</option>
+                            </select>
+
+                            <!-- View toggle -->
+                            <div class="flex items-center bg-dark-900 border border-merlot-950/40 rounded-xl p-1 gap-1">
+                                <button id="view-btn-grid" onclick="setCatalogView('grid')" title="Card view"
+                                    class="p-1.5 rounded-lg bg-merlot-900 text-white transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></svg>
+                                </button>
+                                <button id="view-btn-list" onclick="setCatalogView('list')" title="List view"
+                                    class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Catalog Results Grid -->
+                    <div id="wine-catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic Wine Card Insertions -->
+                    </div>
+
+                    <!-- Catalog List View -->
+                    <div id="wine-catalog-list" class="hidden bg-dark-800 rounded-2xl border border-merlot-950/20 overflow-hidden">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-[10px] uppercase tracking-wider text-gray-500">
+                                    <th class="text-left px-4 py-3 font-semibold">Wine</th>
+                                    <th class="text-left px-4 py-3 font-semibold hidden sm:table-cell">Winery</th>
+                                    <th class="text-left px-4 py-3 font-semibold hidden md:table-cell">Vintage</th>
+                                    <th class="text-left px-4 py-3 font-semibold hidden md:table-cell">Type</th>
+                                    <th class="text-left px-4 py-3 font-semibold hidden lg:table-cell">Region</th>
+                                    <th class="text-left px-4 py-3 font-semibold hidden sm:table-cell">Rack</th>
+                                    <th class="text-right px-4 py-3 font-semibold">Value</th>
+                                    <th class="text-left px-4 py-3 font-semibold hidden lg:table-cell whitespace-nowrap">Drink Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wine-catalog-list-body">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty state component -->
+                    <div id="catalog-empty-state" class="hidden text-center py-24 bg-dark-800 rounded-3xl border border-dashed border-merlot-950/20 space-y-4">
+                        <div class="h-16 w-16 bg-merlot-950/30 rounded-full flex items-center justify-center text-gold-500 text-2xl mx-auto border border-gold-500/10">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.7 3H5.3C4 3 3.3 4.3 4 5.4L9 13.1V19H7v2h10v-2h-2v-5.9l5-7.7C20.7 4.3 20 3 18.7 3z"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="font-serif text-lg font-bold text-white">No Bottles Found Matching Criteria</h3>
+                            <p class="text-xs text-gray-400 mt-1 max-w-md mx-auto leading-relaxed">Adjust your filters, clear your search query, or upload a new photo label to expand your collection.</p>
+                        </div>
+                        <button onclick="document.getElementById('catalog-search').value=''; document.getElementById('filter-type').value='all'; filterCatalog();" class="px-5 py-2.5 bg-dark-900 border border-merlot-900/40 hover:border-gold-500/40 text-gold-400 rounded-xl text-xs font-semibold transition-colors">
+                            Reset Search Filters
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Tab: Rack Section -->
+                <section id="tab-rack" class="space-y-6 hidden">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                        <div>
+                            <h2 class="font-serif text-2xl font-bold text-white">Physical Cellar Rack Assignment</h2>
+                            <p class="text-xs text-gray-400 mt-1">Map coordinate matrix representing active shelf positions (Rows A-F, Columns 1-9)</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <button onclick="resetCellarRacks()" class="px-4 py-2.5 border border-rose-950/40 hover:border-rose-500/30 bg-rose-950/10 text-rose-400 hover:bg-rose-950/25 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path stroke-linecap="round" d="M19 6l-1 14H6L5 6m5 0V4h4v2"/></svg> Clear All Coordinates
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Informational legend banner -->
+                    <div class="flex flex-wrap gap-4 p-4 rounded-xl bg-dark-800 border border-merlot-950/20 text-[10px] uppercase font-semibold text-gray-400 items-center">
+                        <span class="text-gray-300">Legend:</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-3 w-3 rounded-full bg-merlot-900/80 border border-merlot-500 inline-block"></span>
+                            <span>Red Wine</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-3 w-3 rounded-full bg-yellow-950/80 border border-yellow-400 inline-block"></span>
+                            <span>White Wine</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-3 w-3 rounded-full bg-amber-950/80 border border-gold-400 inline-block"></span>
+                            <span>Sparkling</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="h-3 w-3 rounded-full bg-dark-900/40 border border-dashed border-gray-800 inline-block"></span>
+                            <span>Empty Cell</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual Grid Matrix Container -->
+                    <div class="bg-dark-800 p-6 md:p-8 rounded-3xl border border-merlot-950/20 shadow-xl overflow-x-auto">
+                        <div id="rack-matrix" class="min-w-[800px] space-y-3">
+                            <!-- Dynamic Matrix Grid built in Javascript -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tab: Sommelier Section -->
+                <section id="tab-sommelier" class="space-y-6 hidden h-[calc(100vh-12rem)] flex flex-col justify-between">
+                    <div>
+                        <h2 class="font-serif text-2xl font-bold text-white">Interactive AI Cellar Sommelier</h2>
+                        <p class="text-xs text-gray-400 mt-1">Converse with a digital advisor loaded with your exact inventory profile.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-grow overflow-hidden h-full">
+                        
+                        <!-- Sommelier Quick Action Suggestions -->
+                        <div class="lg:col-span-1 bg-dark-800 p-5 rounded-2xl border border-merlot-950/10 flex flex-col gap-4">
+                            <h3 class="font-serif text-sm font-bold text-white pb-3 border-b border-gray-800/60">Suggested Cellar Prompts</h3>
+                            
+                            <div class="space-y-2 flex-grow overflow-y-auto">
+                                <button onclick="sendQuickSommelierQuery('What should I pair with pan-seared salmon? Suggest from my inventory.')" class="w-full text-left p-3 rounded-xl bg-dark-900/50 hover:bg-dark-900 border border-gray-800/40 hover:border-gold-500/20 text-xs text-gray-300 hover:text-white transition-all">
+                                    <p class="font-semibold text-gold-400 mb-0.5">Salmon Pairing</p>
+                                    <p class="text-[10px] text-gray-500 truncate leading-relaxed">Match from my available whites/reds...</p>
+                                </button>
+
+                                <button onclick="sendQuickSommelierQuery('Recommend a bottle to open for a special steak dinner.')" class="w-full text-left p-3 rounded-xl bg-dark-900/50 hover:bg-dark-900 border border-gray-800/40 hover:border-gold-500/20 text-xs text-gray-300 hover:text-white transition-all">
+                                    <p class="font-semibold text-gold-400 mb-0.5">Red Meat Selection</p>
+                                    <p class="text-[10px] text-gray-500 truncate leading-relaxed">Find a Pinot Noir matching steak nights...</p>
+                                </button>
+
+                                <button onclick="sendQuickSommelierQuery('Give me an overview of my total cellar holdings and its valuation.')" class="w-full text-left p-3 rounded-xl bg-dark-900/50 hover:bg-dark-900 border border-gray-800/40 hover:border-gold-500/20 text-xs text-gray-300 hover:text-white transition-all">
+                                    <p class="font-semibold text-gold-400 mb-0.5">Cellar Audit</p>
+                                    <p class="text-[10px] text-gray-500 truncate leading-relaxed">A professional breakdown of bottles...</p>
+                                </button>
+
+                                <button onclick="sendQuickSommelierQuery('Which of my wines would you suggest drinking first vs cellaring longer?')" class="w-full text-left p-3 rounded-xl bg-dark-900/50 hover:bg-dark-900 border border-gray-800/40 hover:border-gold-500/20 text-xs text-gray-300 hover:text-white transition-all">
+                                    <p class="font-semibold text-gold-400 mb-0.5">Drinkability Window</p>
+                                    <p class="text-[10px] text-gray-500 truncate leading-relaxed">Identify vintage age readiness...</p>
+                                </button>
+                            </div>
+
+                            <button onclick="clearSommelierChat()" class="py-2 px-3 bg-dark-900 border border-rose-950/40 hover:border-rose-500/20 text-rose-400 rounded-xl text-[10px] font-bold tracking-wider uppercase text-center transition-colors">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 21l9-9m0 0l6-6a2 2 0 00-3-3L9 9m0 0L3 21"/></svg> Clear Chat Logs
+                            </button>
+                        </div>
+
+                        <!-- Main Chat Screen Area -->
+                        <div class="lg:col-span-3 bg-dark-800 rounded-2xl border border-merlot-950/10 flex flex-col justify-between overflow-hidden h-full">
+                            <!-- Chat Box Conversation Stream -->
+                            <div id="sommelier-chat-logs" class="flex-grow p-6 overflow-y-auto space-y-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="h-8 w-8 rounded-full bg-merlot-600 border border-gold-500/20 flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-3 h-3 text-gold-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                    </div>
+                                    <div class="bg-dark-900/80 rounded-2xl rounded-tl-none px-4 py-3 text-xs max-w-[80%] text-gray-300">
+                                        <p class="font-semibold text-gold-400 text-xs font-serif uppercase tracking-wider mb-1">Vault Sommelier</p>
+                                        Greetings. I am your estate sommelier assistant. Your Oregon wine collection has been fully context-loaded. Ask me about specific bottles, optimal drinking windows, food pairings, or general cellaring advice. How may I serve you today?
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chat Submission Form -->
+                            <form id="sommelier-chat-form" onsubmit="handleSommelierChat(event)" class="p-4 bg-dark-900/40 border-t border-gray-800/60 flex items-center gap-3">
+                                <input id="sommelier-chat-input" type="text" placeholder="Inquire about culinary pairings, vintages, shelf life..." class="flex-grow bg-dark-850 border border-merlot-950/40 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold-500/50 transition-all">
+                                <button type="submit" class="p-3 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold border border-gold-500/10 flex items-center justify-center shadow-md transition-all active:scale-95 duration-100">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modal: Catalog / Modify Wine Profile -->
+    <div id="add-wine-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 hidden">
+        <div class="bg-dark-850 rounded-3xl border border-merlot-900/30 w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            <!-- Modal header bar -->
+            <div class="px-6 py-4 bg-dark-900 border-b border-merlot-950/60 flex justify-between items-center flex-shrink-0">
+                <h3 id="modal-title" class="font-serif text-lg font-bold text-white tracking-wide">Catalog New Bottle</h3>
+                <button onclick="closeAddWineModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Modal scroll body content -->
+            <form id="wine-form" onsubmit="saveWine(event)" class="flex-grow overflow-y-auto p-6 md:p-8 space-y-6">
+                <!-- Internal hidden controls -->
+                <input type="hidden" id="wine-id-field" value="">
+                <input type="hidden" id="wine-photo-b64-field" value="">
+
+                <!-- Simplified Upload Zone Panel (Auto AI scanning triggers on selection) -->
+                <div class="space-y-2 pb-6 border-b border-gray-800/60">
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-gray-400">Wine Photo Label</label>
+                    
+                    <div class="relative rounded-2xl border-2 border-dashed border-merlot-950/40 hover:border-gold-500/20 bg-dark-900/40 p-6 flex flex-col items-center justify-center text-center cursor-pointer min-h-[140px] group transition-all" onclick="triggerFileInput()">
+                        <!-- Hidden HTML File tag input -->
+                        <input type="file" id="wine-image-file" accept="image/*" class="hidden" onchange="previewWineImage(event)">
+                        
+                        <!-- Prompt screen UI display -->
+                        <div id="upload-prompt" class="space-y-2">
+                            <svg class="w-7 h-7 text-gray-500 group-hover:text-gold-500 transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                            <p class="text-xs text-gray-300 font-medium">Click to select photo or upload wine label</p>
+                            <p class="text-[10px] text-gray-500 uppercase tracking-widest leading-none">Supports JPG, PNG formats</p>
+                        </div>
+
+                        <!-- Preview Screen UI display -->
+                        <div id="image-preview-container" class="hidden absolute inset-0 rounded-2xl overflow-hidden bg-dark-950 flex items-center justify-center border border-merlot-950/10">
+                            <img id="label-image-preview" src="#" alt="Uploaded Label preview" class="h-full w-full object-contain">
+                            
+                            <!-- Scan Laser Line Layer overlay -->
+                            <div id="laser-bar" class="laser-line hidden absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-gold-400 to-transparent shadow-[0_0_12px_#cfb864] z-10"></div>
+                        </div>
+                    </div>
+
+                    <!-- Remove photo trigger -->
+                    <div class="mt-2 flex justify-between items-center">
+                        <button type="button" id="btn-scan-label" onclick="analyzeWineLabel()" class="hidden text-[10px] text-gold-400 hover:text-gold-300 font-bold bg-dark-900 border border-gold-950 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 3l1.5 1.5M3 5l1.5 1.5M12 3v2m0 14v2M3 12H1m20 0h-2M5.5 18.5L4 20M18.5 5.5L20 4M19 19l-7-7 2-2 7 7-2 2z"/></svg> AI Scan Label
+                        </button>
+                        <button type="button" id="btn-remove-photo" onclick="clearWinePhoto()" class="hidden text-[10px] text-rose-400 hover:text-rose-300 font-semibold flex items-center gap-1 transition-all ml-auto">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M8 12h8"/></svg> Remove Photo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Structured Param Grid Forms -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Structured Parameters</h4>
+                        <!-- Live Market Valuation Tool -->
+                        <button type="button" id="btn-market-research" onclick="researchWineMarket()" class="text-[10px] text-gold-400 hover:text-gold-300 font-bold bg-dark-900 border border-gold-950 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-gold-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg> Google Search Market Intel
+                        </button>
+                    </div>
+                    
+                    <!-- Market intelligence report placeholder -->
+                    <div id="market-intel-box" class="hidden p-4 rounded-xl bg-gold-950/20 border border-gold-800/30 text-xs text-gray-300 space-y-2">
+                        <div class="flex items-center justify-between border-b border-gold-850 pb-2">
+                            <span class="font-bold text-gold-400 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4m0-4h.01"/></svg> Grounded Market Intel</span>
+                            <button type="button" onclick="applyResearchedValue()" id="btn-apply-intel-price" class="px-2 py-0.5 bg-gold-600 hover:bg-gold-500 text-white text-[9px] font-bold rounded">Apply Price</button>
+                        </div>
+                        <p id="market-intel-text" class="leading-relaxed font-sans"></p>
+                        <div id="market-intel-sources" class="text-[9px] text-gray-500 pt-1 border-t border-gold-950 flex flex-wrap gap-2"></div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 font-serif">Winery</label>
+                            <input type="text" id="form-winery" placeholder="e.g. Flâneur" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 font-serif">Wine Name</label>
+                            <input type="text" id="form-name" placeholder="e.g. Flânerie Vineyard" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5 font-serif">Vintage Year</label>
+                            <input type="text" id="form-vintage" placeholder="e.g. 2021" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Wine Style Type</label>
+                            <select id="form-type" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
+                                <option value="Red">Red Wine</option>
+                                <option value="White">White Wine</option>
+                                <option value="Sparkling">Sparkling Wine</option>
+                                <option value="Rosé">Rosé Wine</option>
+                                <option value="Dessert">Dessert Wine</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Country of Origin</label>
+                            <input type="text" id="form-country" placeholder="e.g. United States" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Region / AVA</label>
+                            <input type="text" id="form-region" placeholder="e.g. Ribbon Ridge AVA, Oregon" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50">
+                        </div>
+                    </div>
+
+                    <!-- Winery Website -->
+                    <div class="flex items-end gap-2">
+                        <div class="flex-1">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Winery Website</label>
+                            <input type="text" id="form-website" placeholder="https://www.winery.com" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50">
+                        </div>
+                        <button type="button" onclick="lookupWineryWebsite()" class="flex-shrink-0 text-[10px] text-gold-400 hover:text-gold-300 font-bold bg-dark-900 border border-gold-950 px-2.5 py-2 rounded-xl transition-colors flex items-center gap-1.5 mb-0.5">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+                            Lookup
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Grape Variety</label>
+                            <input type="text" id="form-grape" placeholder="e.g. Pinot Noir" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">ABV% Strength</label>
+                            <input type="text" id="form-abv" placeholder="e.g. 14.1%" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50">
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Value (USD)</label>
+                            <input type="number" id="form-price" placeholder="e.g. 65" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Personal Rating</label>
+                            <select id="form-rating" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
+                                <option value="5">★★★★★ Outstanding (5/5)</option>
+                                <option value="4">★★★★☆ Excellent (4/5)</option>
+                                <option value="3">★★★☆☆ Good (3/5)</option>
+                                <option value="2">★★☆☆☆ Average (2/5)</option>
+                                <option value="1">★☆☆☆☆ Poor (1/5)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Rack Location (Row)</label>
+                            <select id="form-rack-row" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
+                                <option value="">Unassigned</option>
+                                <option value="A">Row A</option>
+                                <option value="B">Row B</option>
+                                <option value="C">Row C</option>
+                                <option value="D">Row D</option>
+                                <option value="E">Row E</option>
+                                <option value="F">Row F</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Rack Location (Col)</label>
+                            <select id="form-rack-col" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
+                                <option value="">Unassigned</option>
+                                <option value="1">Column 1</option>
+                                <option value="2">Column 2</option>
+                                <option value="3">Column 3</option>
+                                <option value="4">Column 4</option>
+                                <option value="5">Column 5</option>
+                                <option value="6">Column 6</option>
+                                <option value="7">Column 7</option>
+                                <option value="8">Column 8</option>
+                                <option value="9">Column 9</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Tasting Notes</label>
+                            <textarea id="form-notes" rows="3" placeholder="Enter aromas, body, wood characteristics..." class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50 resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Culinary Food Pairings</label>
+                            <textarea id="form-pairing" rows="3" placeholder="Dishes like duck, oysters, chanterelles..." class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-650 focus:outline-none focus:border-gold-500/50 resize-none"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Critic Scores Section -->
+                    <div class="pt-2 border-t border-gray-800/60">
+                        <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5 mb-3">
+                            <svg class="w-3.5 h-3.5 text-gold-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                            Critic Scores
+                        </h4>
+
+                        <!-- Loading state -->
+                        <div id="scores-loading" class="hidden flex items-center gap-2 text-[11px] text-gray-500 py-2">
+                            <svg class="w-3.5 h-3.5 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                            Looking up critic scores...
+                        </div>
+
+                        <!-- Scores result -->
+                        <div id="scores-result" class="hidden">
+                            <div id="scores-grid" class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2"></div>
+                            <p id="scores-note" class="text-[10px] text-gray-600 italic mt-1"></p>
+                        </div>
+
+                        <!-- No scores found -->
+                        <div id="scores-empty" class="hidden space-y-3">
+                            <p class="text-[11px] text-gray-600 italic">Boutique producer — not widely reviewed by major critics.</p>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="manual-score-input" min="80" max="100" placeholder="Enter score (80–100)" class="flex-1 bg-dark-900 border border-gray-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                                <select id="manual-score-critic" class="bg-dark-900 border border-gray-800 rounded-lg px-2 py-1.5 text-xs text-gray-400 focus:outline-none focus:border-gold-500/50">
+                                    <option>My Score</option>
+                                    <option>Wine Spectator</option>
+                                    <option>James Suckling</option>
+                                    <option>Vinous</option>
+                                    <option>Wine Advocate</option>
+                                    <option>Jeb Dunnuck</option>
+                                </select>
+                                <button onclick="saveManualScore()" class="text-[10px] text-gold-400 hover:text-gold-300 font-bold bg-dark-900 border border-gold-950 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                                    Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Drink Window Section -->
+                    <div class="pt-2 border-t border-gray-800/60">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-gold-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
+                                Drinking Window
+                            </h4>
+                            <button type="button" onclick="analyzeDrinkWindow()" id="btn-drink-window" class="text-[10px] text-gray-500 hover:text-gold-400 font-bold bg-dark-900 border border-gray-800 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1.5">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 3l1.5 1.5M3 5l1.5 1.5M12 3v2m0 14v2M3 12H1m20 0h-2M5.5 18.5L4 20M18.5 5.5L20 4M19 19l-7-7 2-2 7 7-2 2z"/></svg>
+                                Re-analyze
+                            </button>
+                        </div>
+
+                        <!-- Drink window result card -->
+                        <div id="drink-window-box" class="hidden rounded-xl border p-4 space-y-3">
+                            <!-- Status pill + window range -->
+                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                <span id="drink-status-pill" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"></span>
+                                <span id="drink-window-range" class="text-xs text-gray-300 font-mono"></span>
+                            </div>
+                            <!-- Progress bar showing current year within window -->
+                            <div class="space-y-1">
+                                <div class="flex justify-between text-[9px] text-gray-500">
+                                    <span id="drink-bar-start"></span>
+                                    <span class="text-gold-400 font-bold">NOW (2026)</span>
+                                    <span id="drink-bar-end"></span>
+                                </div>
+                                <div class="relative h-2 rounded-full bg-dark-800 overflow-hidden">
+                                    <div id="drink-bar-fill" class="absolute h-full rounded-full transition-all duration-700"></div>
+                                    <div id="drink-bar-now" class="absolute top-0 h-full w-0.5 bg-white/80"></div>
+                                </div>
+                            </div>
+                            <!-- AI recommendation text -->
+                            <p id="drink-window-text" class="text-[11px] text-gray-300 leading-relaxed"></p>
+                        </div>
+
+                        <!-- Empty state before analysis -->
+                        <div id="drink-window-empty" class="rounded-xl border border-dashed border-gray-800 p-4 text-center">
+                            <p class="text-[11px] text-gray-500">Analyzing drinking window...</p>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Modal Bottom control footer -->
+            <div class="px-6 py-4 bg-dark-900 border-t border-merlot-950/60 flex flex-wrap gap-3 items-center justify-between flex-shrink-0">
+                <button type="button" id="btn-delete-wine" onclick="deleteCurrentWine()" class="hidden px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/40 text-rose-400 rounded-xl text-xs font-bold transition-all">
+                    Remove Bottle
+                </button>
+                
+                <div class="flex items-center gap-2.5 ml-auto">
+                    <button type="button" onclick="closeAddWineModal()" class="px-4 py-2.5 border border-merlot-950/40 hover:bg-dark-900 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition-all">
+                        Cancel
+                    </button>
+                    <button type="button" onclick="saveWine(event)" class="px-6 py-2.5 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold border border-gold-500/10 shadow-md shadow-merlot-950 transition-all active:scale-95 duration-100">
+                        Commit Profile
+                    </button>
+                </div>
+            </div>
+    </div>
+
+    <script>
+        // Real-world boutique Oregon collection mapped to your provided images
+        const defaultWineSeed = [
+            {
+                id: "w1",
+                wineName: "Flânerie Vineyard Pinot Noir",
+                winery: "Flâneur",
+                vintage: "2021",
+                wineType: "Red",
+                grapeVariety: "Pinot Noir",
+                region: "Ribbon Ridge AVA, Willamette Valley",
+                country: "United States",
+                abv: "14.1%",
+                estimatedValue: 65,
+                rating: "5",
+                rackRow: "A",
+                rackCol: "1",
+                tastingNotes: "Rich aromas of wild black cherry, damp forest floor, and delicate rose petal. Beautiful structured tannins and mineral tension typical of Ribbon Ridge sedimentary soils.",
+                foodPairing: "Roasted duck breast, chanterelle mushroom risotto, or herb-crusted pork tenderloin.",
+                image: "IMG_0761.jpeg" // Assigned picture name verbatim
+            },
+            {
+                id: "w2",
+                wineName: "Apple Field Vineyard Pinot Noir",
+                winery: "White Walnut Estate",
+                vintage: "2023",
+                wineType: "Red",
+                grapeVariety: "Pinot Noir",
+                region: "Dundee Hills AVA",
+                country: "United States",
+                abv: "14.4%",
+                estimatedValue: 75,
+                rating: "5",
+                rackRow: "A",
+                rackCol: "3",
+                tastingNotes: "Expressive red raspberry, wild strawberry, and volcanic Jory soil minerality. Fine-grained silky tannins with hints of baking spice and elegant, persistent length. Biodynamically grown.",
+                foodPairing: "Pan-seared salmon, roasted quail, or duck confit.",
+                image: "IMG_0760.jpeg" // Assigned picture name verbatim
+            },
+            {
+                id: "w3",
+                wineName: "Whistling Ridge Vineyard Blanc de Gris (Brut Nature)",
+                winery: "Goodfellow Family Cellars",
+                vintage: "2022",
+                wineType: "Sparkling",
+                grapeVariety: "Pinot Gris",
+                region: "Ribbon Ridge, Willamette Valley",
+                country: "United States",
+                abv: "12.6%",
+                estimatedValue: 48,
+                rating: "5",
+                rackRow: "B",
+                rackCol: "2",
+                tastingNotes: "Crisp green pear, white orchard blossom, wet stones, and subtle brioche notes from extended lees contact. Extraordinarily dry, bright, saline, and refreshing sparkling wine disgorged in Dec 2024.",
+                foodPairing: "Freshly shucked oysters, Dungeness crab, or tempura spring vegetables.",
+                image: "IMG_0759.jpeg" // Assigned picture name verbatim
+            },
+            {
+                id: "w4",
+                wineName: "Whistling Ridge Vineyard Pinot Noir",
+                winery: "Goodfellow Family Cellars",
+                vintage: "2023",
+                wineType: "Red",
+                grapeVariety: "Pinot Noir",
+                region: "Ribbon Ridge, Willamette Valley",
+                country: "United States",
+                abv: "13.4%",
+                estimatedValue: 60,
+                rating: "5",
+                rackRow: "C",
+                rackCol: "4",
+                tastingNotes: "From dry-farmed vines planted in 1990. Elegant bouquet of red currants, sour cherries, black tea, dried thyme, and iron-like minerality. Classic high-acid structure with superb cellaring potential.",
+                foodPairing: "Roasted lamb chops, wild mushroom ragu, or game hens.",
+                image: "IMG_0758.jpeg" // Assigned picture name verbatim
+            },
+            {
+                id: "w5",
+                wineName: "Durant Vineyard Chardonnay",
+                winery: "Goodfellow Family Cellars",
+                vintage: "2023",
+                wineType: "White",
+                grapeVariety: "Chardonnay",
+                region: "Dundee Hills, Willamette Valley",
+                country: "United States",
+                abv: "11.3%",
+                estimatedValue: 52,
+                rating: "5",
+                rackRow: "D",
+                rackCol: "5",
+                tastingNotes: "Exceptional tension and driving energy. Crisp green apple, lemon zest, flinty reduction, and white floral overtones. Cultivated from vines planted in 1993.",
+                foodPairing: "Grilled halibut, roasted chicken with garlic and lemon, or fresh goat cheese.",
+                image: "IMG_0757.jpeg" // Assigned picture name verbatim
+            },
+            {
+                id: "w6",
+                wineName: "Apple Field Vineyard Chardonnay",
+                winery: "White Walnut Estate",
+                vintage: "2024",
+                wineType: "White",
+                grapeVariety: "Chardonnay",
+                region: "Dundee Hills AVA",
+                country: "United States",
+                abv: "13.27%",
+                estimatedValue: 68,
+                rating: "5",
+                rackRow: "D",
+                rackCol: "7",
+                tastingNotes: "Rich biodynamically grown Chardonnay offering creamy lemon curd, white peach, crushed oyster shells, and masterfully integrated subtle French oak spice. Vibrant yet texturally complete.",
+                foodPairing: "Butter-poached lobster, pan-roasted scallops, or creamy chanterelle pasta.",
+                image: "IMG_0756.jpeg" // Assigned picture name verbatim
+            }
+        ];
+
+        // Global single definition of high-fidelity filename mapping for fallback simulation
+        const fileSimulations = {
+            "IMG_0761.jpeg": {
+                wineName: "Flânerie Vineyard Pinot Noir", winery: "Flâneur", vintage: 2021, wineType: "Red",
+                country: "United States", region: "Ribbon Ridge AVA, Willamette Valley", grapeVariety: "Pinot Noir",
+                abv: "14.1%", estimatedValue: 65, rating: "5",
+                tastingNotes: "Rich aromas of wild black cherry, damp forest floor, and delicate rose petal. Beautiful structured tannins and mineral tension typical of Ribbon Ridge sedimentary soils.",
+                foodPairing: "Roasted duck breast, chanterelle mushroom risotto, or herb-crusted pork tenderloin."
+            },
+            "IMG_0760.jpeg": {
+                wineName: "Apple Field Vineyard Pinot Noir", winery: "White Walnut Estate", vintage: 2023, wineType: "Red",
+                country: "United States", region: "Dundee Hills AVA", grapeVariety: "Pinot Noir",
+                abv: "14.4%", estimatedValue: 75, rating: "5",
+                tastingNotes: "Expressive red raspberry, wild strawberry, and volcanic Jory soil minerality. Fine-grained silky tannins with hints of baking spice and elegant, persistent length. Biodynamically grown.",
+                foodPairing: "Pan-seared salmon, roasted quail, or duck confit."
+            },
+            "IMG_0759.jpeg": {
+                wineName: "Whistling Ridge Vineyard Blanc de Gris (Brut Nature)", winery: "Goodfellow Family Cellars", vintage: 2022, wineType: "Sparkling",
+                country: "United States", region: "Ribbon Ridge, Willamette Valley", grapeVariety: "Pinot Gris",
+                abv: "12.6%", estimatedValue: 48, rating: "5",
+                tastingNotes: "Crisp green pear, white orchard blossom, wet stones, and subtle brioche notes from extended lees contact. Extraordinarily dry, bright, saline, and refreshing sparkling wine disgorged in Dec 2024.",
+                foodPairing: "Freshly shucked oysters, Dungeness crab, or tempura spring vegetables."
+            },
+            "IMG_0758.jpeg": {
+                wineName: "Whistling Ridge Vineyard Pinot Noir", winery: "Goodfellow Family Cellars", vintage: 2023, wineType: "Red",
+                country: "United States", region: "Ribbon Ridge, Willamette Valley", grapeVariety: "Pinot Noir",
+                abv: "13.4%", estimatedValue: 60, rating: "5",
+                tastingNotes: "From dry-farmed vines planted in 1990. Elegant bouquet of red currants, sour cherries, black tea, dried thyme, and iron-like minerality. Classic high-acid structure with superb cellaring potential.",
+                foodPairing: "Roasted lamb chops, wild mushroom ragu, or game hens."
+            },
+            "IMG_0757.jpeg": {
+                wineName: "Durant Vineyard Chardonnay", winery: "Goodfellow Family Cellars", vintage: 2023, wineType: "White",
+                country: "United States", region: "Dundee Hills, Willamette Valley", grapeVariety: "Chardonnay",
+                abv: "11.3%", estimatedValue: 52, rating: "5",
+                tastingNotes: "Exceptional tension and driving energy. Crisp green apple, lemon zest, flinty reduction, and white floral overtones. Cultivated from vines planted in 1993.",
+                foodPairing: "Grilled halibut, roasted chicken with garlic and lemon, or fresh goat cheese."
+            },
+            "IMG_0756.jpeg": {
+                wineName: "Apple Field Vineyard Chardonnay", winery: "White Walnut Estate", vintage: 2024, wineType: "White",
+                country: "United States", region: "Dundee Hills AVA", grapeVariety: "Chardonnay",
+                abv: "13.27%", estimatedValue: 68, rating: "5",
+                tastingNotes: "Rich biodynamically grown Chardonnay offering creamy lemon curd, white peach, crushed oyster shells, and masterfully integrated subtle French oak spice. Vibrant yet texturally complete.",
+                foodPairing: "Butter-poached lobster, pan-roasted scallops, or creamy chanterelle pasta."
+            }
+        };
+
+        // Global database arrays
+        let cellarInventory = [];
+        let confirmCallback = null;
+
+        window.onload = function() {
+            // Read storage files or seed initial Oregon defaults
+            const stored = localStorage.getItem("basement_reserve_collection_2026");
+            if (stored) {
+                try {
+                    cellarInventory = JSON.parse(stored);
+                } catch(e) {
+                    cellarInventory = [...defaultWineSeed];
+                }
+            } else {
+                cellarInventory = [...defaultWineSeed];
+                saveToLocalStorage();
+            }
+
+            // Bind current calendar date
+            const dateSpan = document.getElementById('current-system-date');
+            if (dateSpan) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                dateSpan.innerText = new Date("2026-05-28T12:00:00").toLocaleDateString('en-US', options);
+            }
+
+            // Configure dialog actions
+            document.getElementById('btn-confirm-cancel').onclick = () => {
+                document.getElementById('custom-confirm-modal').classList.add('hidden');
+                confirmCallback = null;
+            };
+            document.getElementById('btn-confirm-accept').onclick = () => {
+                document.getElementById('custom-confirm-modal').classList.add('hidden');
+                if (confirmCallback) {
+                    confirmCallback();
+                    confirmCallback = null;
+                }
+            };
+
+            // Build interfaces
+            renderDashboard();
+            renderCatalog();
+            renderRackMatrix();
+            initGovee();
+
+            // Show GitHub push button if already configured
+            if (localStorage.getItem('github_token')) {
+                const btn = document.getElementById('btn-github-push');
+                btn.classList.remove('hidden');
+                btn.classList.add('flex');
+            }
+        };
+
+        // Custom Luxury Confirm Prompt Handler
+        function showCustomConfirm(message, action) {
+            document.getElementById('confirm-modal-text').innerText = message;
+            confirmCallback = action;
+            document.getElementById('custom-confirm-modal').classList.remove('hidden');
+        }
+
+        // Save layout state helper
+        function saveToLocalStorage() {
+            localStorage.setItem("basement_reserve_collection_2026", JSON.stringify(cellarInventory));
+        }
+
+        // Claude API helper
+        async function callClaudeAPI(messages, systemPrompt, imageData) {
+            const payload = {
+                model: "claude-sonnet-4-20250514",
+                max_tokens: 1000,
+                system: systemPrompt,
+                messages: messages
+            };
+
+            const response = await fetch("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error?.message || `API error ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.content.map(b => b.text || "").filter(Boolean).join("\n");
+        }
+
+        function triggerFileInput() {
+            const input = document.getElementById('wine-image-file');
+            if (input) input.click();
+        }
+
+        // Process file preview & register names
+        function previewWineImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const b64 = e.target.result;
+                
+                document.getElementById('upload-prompt').classList.add('hidden');
+                document.getElementById('image-preview-container').classList.remove('hidden');
+                document.getElementById('label-image-preview').src = b64;
+                document.getElementById('btn-remove-photo').classList.remove('hidden');
+                
+                document.getElementById('wine-photo-b64-field').value = file.name;
+                window._lastUploadedImageDataUri = b64;
+                document.getElementById('btn-scan-label').classList.remove('hidden');
+
+                // Auto-trigger AI label scan immediately
+                analyzeWineLabel();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearWinePhoto() {
+            const fileInput = document.getElementById('wine-image-file');
+            if (fileInput) fileInput.value = "";
+            
+            window._lastUploadedImageDataUri = null;
+            document.getElementById('wine-photo-b64-field').value = "";
+            const imgEl = document.getElementById('label-image-preview');
+            imgEl.src = "#";
+            imgEl.style.opacity = '1';
+            imgEl.style.display = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('upload-prompt').classList.remove('hidden');
+            document.getElementById('btn-remove-photo').classList.add('hidden');
+            const scanBtn = document.getElementById('btn-scan-label');
+            if (scanBtn) scanBtn.classList.add('hidden');
+            // Clean up any injected loaders or fallback cards
+            const loader = document.getElementById('photo-fetch-loader');
+            if (loader) loader.remove();
+            const fallback = document.getElementById('photo-fallback-card');
+            if (fallback) fallback.remove();
+        }
+
+        // Automated AI Scan execution using Claude vision
+        async function analyzeWineLabel() {
+            const photoVal = document.getElementById('wine-photo-b64-field').value;
+            const storedDataUri = window._lastUploadedImageDataUri;
+
+            // Check if we have a real uploaded image
+            if (!storedDataUri) {
+                // Fall back to filename-based simulation for pre-seeded bottles
+                if (photoVal && fileSimulations[photoVal]) {
+                    const matchedData = fileSimulations[photoVal];
+                    document.getElementById('form-winery').value = matchedData.winery;
+                    document.getElementById('form-name').value = matchedData.wineName;
+                    document.getElementById('form-vintage').value = matchedData.vintage;
+                    document.getElementById('form-type').value = matchedData.wineType;
+                    document.getElementById('form-country').value = matchedData.country;
+                    document.getElementById('form-region').value = matchedData.region;
+                    document.getElementById('form-grape').value = matchedData.grapeVariety;
+                    document.getElementById('form-abv').value = matchedData.abv;
+                    document.getElementById('form-price').value = matchedData.estimatedValue;
+                    document.getElementById('form-rating').value = matchedData.rating;
+                    document.getElementById('form-notes').value = matchedData.tastingNotes;
+                    document.getElementById('form-pairing').value = matchedData.foodPairing;
+                    showToast("Label data loaded from cellar archive.", "success");
+                } else {
+                    showToast("Please upload a wine label photo to scan.", "error");
+                }
+                return;
+            }
+
+            // Animate laser scanning visual effect
+            const laser = document.getElementById('laser-bar');
+            if (laser) laser.classList.remove('hidden');
+            showToast("AI Sommelier: Scanning label with Claude Vision...", "info");
+
+            try {
+                // Extract base64 data and mime type from data URL
+                const [header, b64data] = storedDataUri.split(',');
+                const mimeType = header.match(/:(.*?);/)[1];
+
+                const messages = [{
+                    role: "user",
+                    content: [
+                        {
+                            type: "image",
+                            source: { type: "base64", media_type: mimeType, data: b64data }
+                        },
+                        {
+                            type: "text",
+                            text: `You are an expert sommelier analyzing a wine label photo. Extract all visible wine details and return ONLY a valid JSON object with these exact keys (use empty string if not visible):
+{
+  "winery": "",
+  "wineName": "",
+  "vintage": "",
+  "wineType": "Red|White|Sparkling|Rosé|Dessert",
+  "country": "",
+  "region": "",
+  "grapeVariety": "",
+  "abv": "",
+  "estimatedValue": 0,
+  "rating": "5",
+  "tastingNotes": "",
+  "foodPairing": ""
+}
+Return ONLY the JSON. No markdown, no explanation.`
+                        }
+                    ]
+                }];
+
+                const systemPrompt = "You are a master sommelier and wine label analyst. Return only valid JSON.";
+                const rawReply = await callClaudeAPI(messages, systemPrompt);
+
+                let parsed;
+                try {
+                    const cleaned = rawReply.replace(/```json|```/g, '').trim();
+                    parsed = JSON.parse(cleaned);
+                } catch (e) {
+                    throw new Error("Could not parse label data.");
+                }
+
+                if (parsed.winery) document.getElementById('form-winery').value = parsed.winery;
+                if (parsed.wineName) document.getElementById('form-name').value = parsed.wineName;
+                if (parsed.vintage) document.getElementById('form-vintage').value = parsed.vintage;
+                if (parsed.wineType) document.getElementById('form-type').value = parsed.wineType;
+                if (parsed.country) document.getElementById('form-country').value = parsed.country;
+                if (parsed.region) document.getElementById('form-region').value = parsed.region;
+                if (parsed.grapeVariety) document.getElementById('form-grape').value = parsed.grapeVariety;
+                if (parsed.abv) document.getElementById('form-abv').value = parsed.abv;
+                if (parsed.estimatedValue) document.getElementById('form-price').value = parsed.estimatedValue;
+                if (parsed.rating) document.getElementById('form-rating').value = parsed.rating;
+                if (parsed.tastingNotes) document.getElementById('form-notes').value = parsed.tastingNotes;
+                if (parsed.foodPairing) document.getElementById('form-pairing').value = parsed.foodPairing;
+
+                showToast("Label scanned — analyzing drinking window...", "success");
+                // Auto-trigger drink window analysis now that fields are populated
+                analyzeDrinkWindow();
+            } catch (err) {
+                console.error("Label scan error:", err);
+                showToast("Label scan failed: " + err.message, "error");
+            } finally {
+                if (laser) laser.classList.add('hidden');
+            }
+        }
+
+        let researchedValueCache = null;
+
+        async function researchWineMarket() {
+            const winery = document.getElementById('form-winery').value.trim();
+            const name = document.getElementById('form-name').value.trim();
+            const vintage = document.getElementById('form-vintage').value.trim();
+
+            if (!winery || !name) {
+                showToast("Please enter at least Winery and Wine Name to trigger research.", "error");
+                return;
+            }
+
+            const intelBox = document.getElementById('market-intel-box');
+            const intelText = document.getElementById('market-intel-text');
+            const intelSources = document.getElementById('market-intel-sources');
+            const btn = document.getElementById('btn-market-research');
+
+            intelBox.classList.remove('hidden');
+            intelText.innerHTML = `<svg class="w-4 h-4 animate-spin text-gold-500 mr-2 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Researching <strong>${winery} ${name} ${vintage}</strong> via AI market analysis...`;
+            intelSources.innerHTML = '';
+
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-4 h-4 animate-spin inline" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg> Researching...`;
+            btn.disabled = true;
+
+            try {
+                const systemPrompt = `You are an expert wine market analyst. Provide concise, accurate pricing intelligence for wines. 
+Always respond with a JSON object containing: { "summary": "...", "estimatedValue": 00, "sources": ["source1", "source2"] }.
+Keep summary under 80 words. estimatedValue must be a number (USD retail price). Return ONLY valid JSON.`;
+
+                const messages = [{
+                    role: "user",
+                    content: `What is the current retail market price and brief market overview for: ${winery} "${name}" ${vintage}? Include typical price range, critical reception if notable, and drinking window.`
+                }];
+
+                const reply = await callClaudeAPI(messages, systemPrompt);
+                let parsed;
+                try {
+                    parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
+                } catch (e) {
+                    parsed = { summary: reply, estimatedValue: 0, sources: ["AI Analysis"] };
+                }
+
+                researchedValueCache = parsed.estimatedValue || null;
+
+                if (researchedValueCache) {
+                    document.getElementById('btn-apply-intel-price').innerText = `Apply Price ($${researchedValueCache})`;
+                    document.getElementById('btn-apply-intel-price').classList.remove('hidden');
+                }
+
+                intelText.innerHTML = `<strong>Market Intelligence:</strong> ${parsed.summary || reply}`;
+                intelSources.innerHTML = `<span class="text-gray-400">Sources:</span> ` + 
+                    (parsed.sources || ["AI Research"]).map(s => `<span class="text-gold-400 font-semibold">${s}</span>`).join(' ');
+
+                showToast("Market appraisal compiled by AI!", "success");
+            } catch (err) {
+                intelText.innerHTML = `<span class="text-rose-400">Research failed: ${err.message}</span>`;
+                showToast("Market research failed.", "error");
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        function applyResearchedValue() {
+            if (researchedValueCache) {
+                document.getElementById('form-price').value = researchedValueCache;
+                showToast(`Applied assessed market value: $${researchedValueCache}!`, "success");
+            }
+        }
+
+        function openAddWineModal() {
+            resetDrinkWindow();
+            resetScores();
+            document.getElementById('form-website').value = "";
+            document.getElementById('modal-title').innerText = "Catalog New Bottle";
+            document.getElementById('wine-form').reset();
+            document.getElementById('wine-id-field').value = "";
+            document.getElementById('btn-delete-wine').classList.add('hidden');
+            document.getElementById('market-intel-box').classList.add('hidden');
+            researchedValueCache = null;
+            
+            clearWinePhoto();
+            document.getElementById('add-wine-modal').classList.remove('hidden');
+        }
+
+        function openAddWineModalAtSlot(row, col) {
+            openAddWineModal();
+            document.getElementById('form-rack-row').value = row;
+            document.getElementById('form-rack-col').value = col;
+            showToast(`Assigning coordinate target shelf: Row ${row}, Column ${col}`, "info");
+        }
+
+        function openEditWineModal(id) {
+            resetDrinkWindow();
+            resetScores();
+            const wine = cellarInventory.find(w => w.id === id);
+            if (!wine) return;
+
+            document.getElementById('modal-title').innerText = "Modify Wine Profile";
+            document.getElementById('wine-id-field').value = wine.id;
+            document.getElementById('market-intel-box').classList.add('hidden');
+            researchedValueCache = null;
+
+            document.getElementById('form-winery').value = wine.winery || "";
+            document.getElementById('form-name').value = wine.wineName || "";
+            document.getElementById('form-vintage').value = wine.vintage || "";
+            document.getElementById('form-type').value = wine.wineType || "Red";
+            document.getElementById('form-country').value = wine.country || "";
+            document.getElementById('form-region').value = wine.region || "";
+            document.getElementById('form-grape').value = wine.grapeVariety || "";
+            document.getElementById('form-abv').value = wine.abv || "";
+            document.getElementById('form-price').value = wine.estimatedValue || "";
+            document.getElementById('form-rating').value = wine.rating || "5";
+            document.getElementById('form-rack-row').value = wine.rackRow || "";
+            document.getElementById('form-rack-col').value = wine.rackCol || "";
+            document.getElementById('form-notes').value = wine.tastingNotes || "";
+            document.getElementById('form-pairing').value = wine.foodPairing || "";
+            document.getElementById('form-website').value = wine.wineryWebsite || "";
+
+            // Auto-fetch critic scores
+            fetchCriticScores(wine.winery, wine.wineName, wine.vintage);
+
+            // Auto-analyze drinking window
+            analyzeDrinkWindow();
+
+            clearWinePhoto();
+
+            // If wine has a real stored image URL, show it immediately
+            if (wine.image && !wine.image.startsWith('IMG')) {
+                document.getElementById('upload-prompt').classList.add('hidden');
+                document.getElementById('image-preview-container').classList.remove('hidden');
+                document.getElementById('label-image-preview').src = wine.image;
+                document.getElementById('wine-photo-b64-field').value = wine.image;
+                document.getElementById('btn-remove-photo').classList.remove('hidden');
+            } else {
+                // Show loading state and auto-fetch wine photo
+                document.getElementById('upload-prompt').classList.add('hidden');
+                document.getElementById('image-preview-container').classList.remove('hidden');
+                document.getElementById('label-image-preview').src = "";
+                document.getElementById('label-image-preview').alt = "Searching for wine photo...";
+                document.getElementById('wine-photo-b64-field').value = wine.image || "";
+
+                // Show a subtle loading shimmer
+                const imgEl = document.getElementById('label-image-preview');
+                imgEl.style.opacity = '0';
+                const previewContainer = document.getElementById('image-preview-container');
+                previewContainer.innerHTML += `<div id="photo-fetch-loader" class="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-dark-950/80 z-20">
+                    <svg class="animate-spin w-6 h-6 text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                    <span class="text-[10px] text-gold-400 font-semibold uppercase tracking-wider">Fetching wine photo...</span>
+                </div>`;
+
+                fetchWinePhoto(wine.winery, wine.wineName, wine.vintage, wine.id);
+            }
+
+            document.getElementById('btn-delete-wine').classList.remove('hidden');
+            document.getElementById('add-wine-modal').classList.remove('hidden');
+        }
+
+        async function fetchWinePhoto(winery, wineName, vintage, wineId) {
+            const loader = document.getElementById('photo-fetch-loader');
+            const imgEl = document.getElementById('label-image-preview');
+            // Google Custom Search blocked in this environment — show fallback card
+            showFallbackPhoto(winery, wineName, vintage, loader, imgEl);
+        }
+
+        function showFallbackPhoto(winery, wineName, vintage, loader, imgEl) {
+            // Elegant text-based fallback card
+            if (loader) loader.remove();
+            imgEl.style.display = 'none';
+            const container = document.getElementById('image-preview-container');
+            const existing = container.querySelector('#photo-fallback-card');
+            if (existing) existing.remove();
+            container.insertAdjacentHTML('beforeend', `
+                <div id="photo-fallback-card" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-dark-950 z-10 p-4">
+                    <div class="w-16 h-24 rounded-lg bg-gradient-to-b from-merlot-900 to-merlot-950 border border-gold-500/30 flex items-center justify-center shadow-xl">
+                        <svg class="w-6 h-6 text-gold-400 opacity-60" fill="currentColor" viewBox="0 0 24 24"><path d="M18.7 3H5.3C4 3 3.3 4.3 4 5.4L9 13.1V19H7v2h10v-2h-2v-5.9l5-7.7C20.7 4.3 20 3 18.7 3z"/></svg>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-gold-400 font-serif italic">${winery}</p>
+                        <p class="text-xs text-white font-semibold mt-0.5">${wineName}</p>
+                        <p class="text-[9px] text-gray-500 mt-0.5">${vintage}</p>
+                    </div>
+                    <button type="button" onclick="triggerFileInput()" class="text-[9px] text-gray-500 hover:text-gold-400 underline transition-colors">Upload photo manually</button>
+                </div>
+            `);
+        }
+
+        function closeAddWineModal() {
+            document.getElementById('add-wine-modal').classList.add('hidden');
+        }
+
+        function saveWine(event) {
+            if (event && event.preventDefault) event.preventDefault();
+
+            const id = document.getElementById('wine-id-field').value;
+            const photoField = document.getElementById('wine-photo-b64-field').value;
+            const existingWine = id ? cellarInventory.find(w => w.id === id) : null;
+
+            const wineryVal = document.getElementById('form-winery').value.trim();
+            const nameVal = document.getElementById('form-name').value.trim();
+            const vintageVal = document.getElementById('form-vintage').value.trim();
+
+            if (!wineryVal || !nameVal) {
+                showToast("Winery and Wine Name are required fields.", "error");
+                return;
+            }
+
+            const entry = {
+                id: id || 'wine_' + Date.now(),
+                wineName: nameVal,
+                winery: wineryVal,
+                vintage: vintageVal,
+                wineType: document.getElementById('form-type').value,
+                country: document.getElementById('form-country').value,
+                region: document.getElementById('form-region').value,
+                grapeVariety: document.getElementById('form-grape').value,
+                abv: document.getElementById('form-abv').value,
+                estimatedValue: Number(document.getElementById('form-price').value) || 0,
+                rating: document.getElementById('form-rating').value,
+                rackRow: document.getElementById('form-rack-row').value,
+                rackCol: document.getElementById('form-rack-col').value,
+                tastingNotes: document.getElementById('form-notes').value,
+                foodPairing: document.getElementById('form-pairing').value,
+                criticScores: existingWine ? existingWine.criticScores : undefined,
+                scoresNote: existingWine ? existingWine.scoresNote : undefined,
+                wineryWebsite: document.getElementById('form-website').value.trim(),
+                drinkStatus: existingWine ? existingWine.drinkStatus : undefined,
+                drinkWindowStart: existingWine ? existingWine.drinkWindowStart : undefined,
+                drinkWindowEnd: existingWine ? existingWine.drinkWindowEnd : undefined,
+                drinkReason: existingWine ? existingWine.drinkReason : undefined,
+                image: photoField || "IMG_0761.jpeg"
+            };
+
+            // Shelf conflict verification
+            if (entry.rackRow && entry.rackCol) {
+                const conflict = cellarInventory.find(w => w.rackRow === entry.rackRow && w.rackCol === entry.rackCol && w.id !== entry.id);
+                if (conflict) {
+                    showToast(`Shelf conflict! ${conflict.wineName} already occupies Row ${entry.rackRow}-Col ${entry.rackCol}.`, "error");
+                    return;
+                }
+            }
+
+            if (id) {
+                const index = cellarInventory.findIndex(w => w.id === id);
+                if (index !== -1) {
+                    cellarInventory[index] = entry;
+                    showToast("Wine profile modified successfully.", "success");
+                }
+            } else {
+                cellarInventory.push(entry);
+                showToast("Added new bottle to private catalog.", "success");
+            }
+
+            saveToLocalStorage();
+            closeAddWineModal();
+
+            renderDashboard();
+            renderCatalog();
+            renderRackMatrix();
+        }
+
+        function deleteCurrentWine() {
+            const id = document.getElementById('wine-id-field').value;
+            if (!id) return;
+
+            showCustomConfirm("Permanently delete this bottle from your private catalog?", () => {
+                cellarInventory = cellarInventory.filter(w => w.id !== id);
+                saveToLocalStorage();
+                closeAddWineModal();
+
+                renderDashboard();
+                renderCatalog();
+                renderRackMatrix();
+                showToast("Bottle removed from vault holdings.", "info");
+            });
+        }
+
+        // Sommelier conversation history
+        let sommelierHistory = [];
+
+        function handleSommelierChat(event) {
+            event.preventDefault();
+
+            const input = document.getElementById('sommelier-chat-input');
+            const logs = document.getElementById('sommelier-chat-logs');
+            if (!input || !logs) return;
+
+            const query = input.value.trim();
+            if (!query) return;
+
+            input.value = '';
+
+            // Render user message bubble
+            appendChatBubble(query, 'user');
+            sommelierHistory.push({ role: "user", content: query });
+
+            // Render loader
+            const loaderId = appendChatBubble("Consulting estate archives...", "sommelier", true);
+
+            // Call Claude API
+            const inventoryContext = JSON.stringify(cellarInventory.map(w => ({
+                name: `${w.winery} ${w.wineName}`,
+                vintage: w.vintage,
+                type: w.wineType,
+                grape: w.grapeVariety,
+                region: w.region,
+                abv: w.abv,
+                value: `$${w.estimatedValue}`,
+                rack: w.rackRow && w.rackCol ? `Row ${w.rackRow}, Col ${w.rackCol}` : "Unassigned",
+                notes: w.tastingNotes,
+                pairing: w.foodPairing
+            })), null, 2);
+
+            const systemPrompt = `You are the Vault Sommelier — an expert, eloquent estate wine butler for Basement Reserve, a private Oregon boutique wine cellar. 
+You have complete knowledge of the owner's cellar inventory. Be conversational, sophisticated, and specific. 
+Recommend specific bottles by name and rack location when relevant. Keep responses concise (2-4 short paragraphs max). 
+Use HTML for formatting: <strong> for wine names, <br> for line breaks, &bull; for bullets.
+
+CURRENT CELLAR INVENTORY:
+${inventoryContext}`;
+
+            callClaudeAPI(sommelierHistory, systemPrompt)
+                .then(reply => {
+                    removeChatBubble(loaderId);
+                    sommelierHistory.push({ role: "assistant", content: reply });
+                    appendChatBubble(reply, 'sommelier');
+                })
+                .catch(err => {
+                    removeChatBubble(loaderId);
+                    const errMsg = `I apologize — I encountered a connection issue: <em>${err.message}</em>. Please try again.`;
+                    appendChatBubble(errMsg, 'sommelier');
+                    sommelierHistory.pop(); // Remove failed user message from history
+                    showToast("Sommelier connection error.", "error");
+                });
+        }
+
+        function appendChatBubble(text, sender, isThinking = false) {
+            const logs = document.getElementById('sommelier-chat-logs');
+            if (!logs) return;
+
+            const bubbleId = 'chat_bubble_' + Date.now() + Math.floor(Math.random() * 100);
+            const wrapper = document.createElement('div');
+            wrapper.id = bubbleId;
+            wrapper.className = "flex items-start gap-3 " + (sender === 'user' ? 'justify-end' : '');
+
+            if (sender === 'user') {
+                wrapper.innerHTML = `
+                    <div class="bg-gradient-to-r from-merlot-800 to-merlot-600 text-white rounded-2xl rounded-tr-none px-4 py-3 text-xs max-w-[80%] border border-gold-500/10 shadow-md">
+                        <p class="font-serif font-bold text-gold-300 text-[9px] uppercase tracking-wider mb-1 text-right">Cellar Owner</p>
+                        <p class="leading-relaxed">${text}</p>
+                    </div>
+                `;
+            } else {
+                wrapper.innerHTML = `
+                    <div class="h-8 w-8 rounded-full bg-merlot-950 border border-gold-600/20 flex items-center justify-center flex-shrink-0 text-gold-400 text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                    </div>
+                    <div class="bg-dark-900 rounded-2xl rounded-tl-none px-4 py-3 text-xs max-w-[80%] text-gray-300 border border-merlot-950/20 shadow-md">
+                        <p class="font-serif font-bold text-gold-400 text-[9px] uppercase tracking-wider mb-1">Vault Sommelier</p>
+                        <div class="leading-relaxed ${isThinking ? 'animate-pulse text-gray-500 italic' : ''}">${text}</div>
+                    </div>
+                `;
+            }
+
+            logs.appendChild(wrapper);
+            logs.scrollTop = logs.scrollHeight;
+            return bubbleId;
+        }
+
+        function removeChatBubble(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
+        function sendQuickSommelierQuery(text) {
+            const input = document.getElementById('sommelier-chat-input');
+            if (input) {
+                input.value = text;
+                document.getElementById('sommelier-chat-form').dispatchEvent(new Event('submit'));
+            }
+        }
+
+        function clearSommelierChat() {
+            sommelierHistory = [];
+            const logs = document.getElementById('sommelier-chat-logs');
+            if (logs) {
+                logs.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <div class="h-8 w-8 rounded-full bg-merlot-950 border border-gold-600/20 flex items-center justify-center flex-shrink-0 text-gold-400 text-xs">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                        </div>
+                        <div class="bg-dark-900 rounded-2xl rounded-tl-none px-4 py-3 text-xs max-w-[80%] text-gray-300 border border-merlot-950/20 shadow-md">
+                            <p class="font-serif font-bold text-gold-400 text-[9px] uppercase tracking-wider mb-1">Vault Sommelier</p>
+                            Greetings. I am your estate sommelier assistant. Your Oregon wine collection has been fully context-loaded. Ask me about specific bottles, optimal drinking windows, food pairings, or general cellaring advice. How may I serve you today?
+                        </div>
+                    </div>
+                `;
+                showToast("Chat logs cleared.", "info");
+            }
+        }
+
+        function computeSommelierReply(query) {
+            const q = query.toLowerCase();
+
+            const reds = cellarInventory.filter(w => w.wineType === 'Red');
+            const whites = cellarInventory.filter(w => w.wineType === 'White');
+            const sparklings = cellarInventory.filter(w => w.wineType === 'Sparkling');
+
+            if (q.includes('salmon') || q.includes('fish')) {
+                const bestWhite = whites[0] || cellarInventory[0];
+                const bestPinot = reds.find(w => w.wineName.includes('Apple Field')) || reds[0];
+                return `For wild Oregon salmon, you have a beautiful local pairing ready to pull:
+                <br><br>
+                1. <strong>${bestPinot.winery} ${bestPinot.wineName} (${bestPinot.vintage})</strong> located at rack coordinates [Row ${bestPinot.rackRow}, Col ${bestPinot.rackCol}]. Its red forest strawberry highlights and delicate tannins will match perfectly without overpowering the salmon.
+                <br><br>
+                2. Alternatively, open your <strong>${bestWhite.winery} ${bestWhite.wineName} (${bestWhite.vintage})</strong>. The driving citrus brightness and lemon acidity cut elegantly through the richness of the fish.`;
+            }
+
+            if (q.includes('steak') || q.includes('meat') || q.includes('beef')) {
+                const bigRed = reds.find(w => w.wineName.includes('Flânerie')) || reds[0];
+                return `To complement steak or red meats, I highly recommend opening your premium <strong>${bigRed.winery} ${bigRed.wineName} (${bigRed.vintage})</strong>. 
+                <br><br>
+                This Pinot Noir from Ribbon Ridge AVA boasts gorgeous dark black cherry structure and volcanic mineral density. Decant for 30 minutes before serving to fully unlock its bouquet. You can fetch this bottle from <strong>Rack Slot ${bigRed.rackRow}-${bigRed.rackCol}</strong>.`;
+            }
+
+            if (q.includes('audit') || q.includes('holdings') || q.includes('total') || q.includes('value')) {
+                const count = cellarInventory.length;
+                const value = cellarInventory.reduce((acc, curr) => acc + (Number(curr.estimatedValue) || 0), 0);
+                return `Here is your private estate cellar valuation audit:
+                <br><br>
+                &bull; <strong>Total Catalog Holdings:</strong> ${count} bottles
+                <br>&bull; <strong>Total Assessed Market Value:</strong> $${value.toLocaleString()} USD
+                <br>&bull; <strong>Style breakdown:</strong> ${reds.length} Red, ${whites.length} White, ${sparklings.length} Sparkling.
+                <br><br>
+                Your collection consists of highly sought-after boutique Oregon producers (Flâneur, White Walnut Estate, and Goodfellow Family Cellars) which are cellaring beautifully. Let me know if you would like vintage-by-vintage breakdowns.`;
+            }
+
+            if (q.includes('drink') || q.includes('cellar') || q.includes('ready')) {
+                return `Based on drinking windows for boutique Willamette Valley vintages:
+                <br><br>
+                &bull; <strong>Ready to Open:</strong> Your <strong>Goodfellow Whistling Ridge Blanc de Gris 2022</strong>. It is showing exceptional crisp mineral balance right now.
+                <br>&bull; <strong>Needs 1-2 years:</strong> Your <strong>White Walnut Estate Apple Field Chardonnay 2024</strong>. Chardonnay can benefit from slight integration time.
+                <br>&bull; <strong>Keep Cellaring:</strong> Your <strong>Goodfellow Whistling Ridge Pinot Noir 2023</strong>. Ribbon Ridge Pinots possess excellent natural acid structure that rewards 3-5 years of dark, cool bottle maturation.`;
+            }
+
+            return `I have parsed your cellar database records. For your boutique collection of Oregon wines, I recommend checking out:
+            <br><br>
+            &bull; <strong>Flâneur Flânerie Vineyard Pinot Noir 2021</strong> (Elegant dark cherries)
+            <br>&bull; <strong>White Walnut Apple Field Pinot Noir 2023</strong> (Volcanic soil minerality)
+            <br>&bull; <strong>Goodfellow Whistling Ridge Chardonnay/Pinot</strong> (Structured tension)
+            <br><br>
+            Let me know if you would like me to draft a custom multicourse pairing menu using these specific bottles!`;
+        }
+
+        const sommelierTips = [
+            "Pinot Noir thrives in Oregon's cool climate, expressing delicate earthiness and red berry profiles beautifully when served at cellared 55°F.",
+            "Blanc de Gris Brut Nature has zero dosage. It shows crisp tension and mineral brightness, making it an excellent oyster pairing.",
+            "Oregon Chardonnay has shifted towards a bright, high-tension Burgundian style, with vibrant citrus fruit and minimal heavy oak.",
+            "Biodynamically grown vines, like those at White Walnut, preserve native yeasts and volcanic Jory soil profiles uniquely in Dundee Hills.",
+            "Ribbon Ridge sedimentary soils yield Pinots with darker fruit complex profiles and structural tannic ageability."
+        ];
+        
+        function showTip() {
+            const el = document.getElementById('sommelier-tip');
+            if (el) {
+                const roll = Math.floor(Math.random() * sommelierTips.length);
+                el.innerText = `"${sommelierTips[roll]}"`;
+            }
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('tab-dashboard').classList.add('hidden');
+            document.getElementById('tab-catalog').classList.add('hidden');
+            document.getElementById('tab-rack').classList.add('hidden');
+            document.getElementById('tab-sommelier').classList.add('hidden');
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+
+            const tabs = ['dashboard', 'catalog', 'rack', 'sommelier'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btn-tab-${t}`);
+                if (btn) {
+                    if (t === tabName) {
+                        btn.className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 bg-merlot-900 text-white shadow-md";
+                    } else {
+                        btn.className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:text-white hover:bg-dark-800 transition-all duration-300";
+                    }
+                }
+                // Mobile nav tabs
+                const mobBtn = document.getElementById(`mob-tab-${t}`);
+                if (mobBtn) {
+                    if (t === tabName) {
+                        mobBtn.className = "flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-white bg-merlot-900/60";
+                    } else {
+                        mobBtn.className = "flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-gray-400";
+                    }
+                }
+            });
+        }
+
+        // Default sort configuration is always vintage-desc now that picker is removed
+        const defaultSortOption = 'vintage-desc';
+
+        function renderDashboard() {
+            document.getElementById('stat-total-bottles').innerText = cellarInventory.length;
+            
+            const valueSum = cellarInventory.reduce((acc, curr) => acc + (Number(curr.estimatedValue) || 0), 0);
+            document.getElementById('stat-total-value').innerText = `$${valueSum.toLocaleString()}`;
+
+            const regions = new Set(cellarInventory.map(w => w.region).filter(Boolean));
+            document.getElementById('stat-regions').innerText = regions.size;
+
+            // Render type counts
+            const types = { Red: 0, White: 0, Sparkling: 0, Rosé: 0 };
+            cellarInventory.forEach(w => {
+                if (types[w.wineType] !== undefined) types[w.wineType]++;
+            });
+
+            const distList = document.getElementById('distribution-list');
+            if (distList) {
+                distList.innerHTML = '';
+                const total = cellarInventory.length || 1;
+                Object.keys(types).forEach(type => {
+                    const pct = Math.round((types[type] / total) * 100);
+                    distList.innerHTML += `
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-gray-300">${type} Wines</span>
+                                <span class="text-gold-400">${types[type]} bottles (${pct}%)</span>
+                            </div>
+                            <div class="w-full bg-dark-950 h-1.5 rounded-full overflow-hidden">
+                                <div class="bg-gradient-to-r from-merlot-700 to-gold-500 h-full rounded-full" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            renderRTDCarousel();
+        }
+
+        let catalogView = 'grid';
+
+        function setCatalogView(view) {
+            catalogView = view;
+            const gridBtn = document.getElementById('view-btn-grid');
+            const listBtn = document.getElementById('view-btn-list');
+            const activeClass = 'bg-merlot-900 text-white';
+            const inactiveClass = 'text-gray-500 hover:text-white';
+
+            if (view === 'grid') {
+                gridBtn.className = `p-1.5 rounded-lg ${activeClass} transition-all`;
+                listBtn.className = `p-1.5 rounded-lg ${inactiveClass} transition-all`;
+            } else {
+                listBtn.className = `p-1.5 rounded-lg ${activeClass} transition-all`;
+                gridBtn.className = `p-1.5 rounded-lg ${inactiveClass} transition-all`;
+            }
+            renderCatalog();
+        }
+
+        function renderCatalogList(wines) {
+            const grid = document.getElementById('wine-catalog-grid');
+            const list = document.getElementById('wine-catalog-list');
+            const body = document.getElementById('wine-catalog-list-body');
+
+            grid.classList.add('hidden');
+            list.classList.remove('hidden');
+
+            const typeColor = {
+                'Red':      'text-merlot-400',
+                'White':    'text-yellow-300',
+                'Sparkling':'text-gold-400',
+                'Rosé':     'text-pink-400',
+                'Dessert':  'text-amber-300',
+            };
+            const statusPill = {
+                'Peak Now':   'bg-green-950/80 text-green-300 border-green-700/40',
+                'Drink Soon': 'bg-amber-950/80 text-amber-300 border-amber-600/40',
+                'Hold':       'bg-indigo-950/80 text-indigo-300 border-indigo-700/40',
+                'Past Peak':  'bg-gray-800/80 text-gray-400 border-gray-600/40',
+                'Too Young':  'bg-blue-950/80 text-blue-300 border-blue-700/40',
+            };
+
+            body.innerHTML = wines.map((w, i) => `
+                <tr class="border-b border-gray-800/50 hover:bg-merlot-950/20 transition-colors ${i % 2 === 0 ? '' : 'bg-dark-900/30'}">
+                    <td class="px-4 py-3">
+                        <p class="font-serif font-bold text-white leading-tight hover:text-gold-400 cursor-pointer transition-colors" onclick="openEditWineModal('${w.id}')">${w.wineName}</p>
+                        <p class="text-gray-500 text-[10px] sm:hidden mt-0.5">${w.winery} &bull; ${w.vintage}</p>
+                    </td>
+                    <td class="px-4 py-3 text-gray-400 hidden sm:table-cell">${w.winery}</td>
+                    <td class="px-4 py-3 text-gray-400 hidden md:table-cell">${w.vintage}</td>
+                    <td class="px-4 py-3 hidden md:table-cell">
+                        <span class="font-semibold ${typeColor[w.wineType] || 'text-gray-400'}">${w.wineType}</span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-500 hidden lg:table-cell text-[11px]">${w.region || '—'}</td>
+                    <td class="px-4 py-3 text-gray-500 hidden sm:table-cell font-mono text-[11px]">${w.rackRow && w.rackCol ? `${w.rackRow}${w.rackCol}` : '—'}</td>
+                    <td class="px-4 py-3 text-right text-gold-400 font-semibold">$${w.estimatedValue}</td>
+                    <td class="px-4 py-3 hidden lg:table-cell whitespace-nowrap">
+                        ${w.drinkStatus ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold border ${statusPill[w.drinkStatus] || ''}">${w.drinkStatus}</span>` : '<span class="text-gray-700 text-[10px]">—</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterCatalog() { renderCatalog(); }
+
+        function renderCatalog() {
+            const grid = document.getElementById('wine-catalog-grid');
+            const empty = document.getElementById('catalog-empty-state');
+            if (!grid) return;
+
+            const searchVal = document.getElementById('catalog-search').value.toLowerCase();
+            const filterType = document.getElementById('filter-type').value;
+
+            let filtered = cellarInventory.filter(w => {
+                const matchesSearch = w.wineName.toLowerCase().includes(searchVal) || 
+                                      w.winery.toLowerCase().includes(searchVal) || 
+                                      w.grapeVariety.toLowerCase().includes(searchVal) || 
+                                      w.region.toLowerCase().includes(searchVal) || 
+                                      (w.tastingNotes && w.tastingNotes.toLowerCase().includes(searchVal));
+                
+                const matchesType = (filterType === 'all') || (w.wineType === filterType);
+                return matchesSearch && matchesType;
+            });
+
+            // Naturally default to sorting by Vintage (Newest First)
+            filtered.sort((a, b) => Number(b.vintage) - Number(a.vintage));
+
+            if (!filtered.length) {
+                grid.innerHTML = '';
+                document.getElementById('wine-catalog-list').classList.add('hidden');
+                grid.classList.remove('hidden');
+                if (empty) empty.classList.remove('hidden');
+                return;
+            }
+            if (empty) empty.classList.add('hidden');
+
+            if (catalogView === 'list') {
+                grid.classList.add('hidden');
+                renderCatalogList(filtered);
+                return;
+            }
+
+            document.getElementById('wine-catalog-list').classList.add('hidden');
+            grid.classList.remove('hidden');
+            grid.innerHTML = '';
+            filtered.forEach(w => {
+                let badgeStyle = 'bg-merlot-950 text-merlot-400 border-merlot-900/30';
+                if (w.wineType === 'White') badgeStyle = 'bg-yellow-950 text-yellow-300 border-yellow-900/30';
+                if (w.wineType === 'Sparkling') badgeStyle = 'bg-amber-950 text-amber-400 border-amber-900/30';
+
+                grid.innerHTML += `
+                    <div class="bg-dark-800 rounded-3xl overflow-hidden border border-merlot-950/10 hover:border-gold-500/20 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group">
+                        <div class="bg-dark-900 p-5 border-b border-gray-900 flex flex-col justify-between gap-4">
+                            <div class="flex justify-between items-center w-full">
+                                <span class="px-2.5 py-0.5 rounded-full text-[9px] font-semibold tracking-wider uppercase border ${badgeStyle}">
+                                    ${w.wineType}
+                                </span>
+                                <span class="text-[10px] font-semibold text-gray-500 bg-dark-950 px-2 py-1 rounded-lg">
+                                    ${w.abv} ABV
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] text-gold-400 font-serif italic block mb-1 tracking-wider uppercase">${w.winery}</span>
+                                <h4 class="font-serif text-lg font-bold text-white tracking-wide leading-tight whitespace-normal break-words">${w.wineName}</h4>
+                            </div>
+                        </div>
+
+                        <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                            <div class="space-y-3">
+                                <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-400 border-b border-gray-850 pb-3">
+                                    <div>
+                                        <p class="text-[8px] uppercase tracking-wider text-gray-500">Vintage</p>
+                                        <p class="font-bold text-white mt-0.5">${w.vintage}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[8px] uppercase tracking-wider text-gray-500">Value</p>
+                                        <p class="font-bold text-gold-400 mt-0.5">$${w.estimatedValue}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-1 text-[11px] text-gray-400">
+                                    <p class="truncate"><svg class="w-3.5 h-3.5 text-gold-500 mr-1 flex-shrink-0 inline" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg> ${w.region}</p>
+                                    <p class="truncate"><svg class="w-3.5 h-3.5 text-gold-500 mr-1 flex-shrink-0 inline" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 22V12m0 0C12 7 7 4 3 5c0 4 3 8 9 7m0 0c0-5 5-8 9-7-1 4-4 7-9 7"/></svg> ${w.grapeVariety}</p>
+                                </div>
+                            </div>
+
+                            <div class="pt-4 border-t border-gray-850 flex items-center justify-between">
+                                ${w.wineryWebsite ? `
+                                <a href="${w.wineryWebsite}" target="_blank" rel="noopener noreferrer"
+                                    class="text-[10px] text-gray-500 hover:text-gold-400 flex items-center gap-1 transition-colors truncate max-w-[55%]">
+                                    <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg>
+                                    <span class="truncate">${w.wineryWebsite.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                                </a>` : `<span></span>`}
+                                <button onclick="openEditWineModal('${w.id}')" class="text-xs text-gold-500 hover:text-gold-400 font-bold tracking-wide flex items-center gap-1 flex-shrink-0">
+                                    Learn More <svg class="w-2.5 h-2.5 inline ml-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14m-7-7l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderRackMatrix() {
+            const matrix = document.getElementById('rack-matrix');
+            if (!matrix) return;
+            matrix.innerHTML = '';
+
+            const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+            // Header row
+            let header = `<div class="flex items-center gap-1 mb-1">
+                <div class="w-12 flex-shrink-0 text-center text-[10px] uppercase font-bold text-gray-600">Row</div>`;
+            cols.forEach(c => {
+                header += `<div class="flex-1 min-w-0 text-center text-[10px] uppercase font-bold text-gray-500">Col ${c}</div>`;
+            });
+            header += '</div>';
+            matrix.innerHTML += header;
+
+            rows.forEach(r => {
+                let rowHtml = `<div class="flex items-center gap-1 min-w-0">`;
+                rowHtml += `<div class="w-12 flex-shrink-0 text-center font-serif text-sm font-bold text-gold-500">${r}</div>`;
+
+                cols.forEach(c => {
+                    const wine = cellarInventory.find(w => w.rackRow === r && w.rackCol === c);
+                    const slotId = `slot-${r}-${c}`;
+
+                    if (wine) {
+                        let style = 'bg-merlot-950/80 border-merlot-500/80 text-merlot-200';
+                        if (wine.wineType === 'White') style = 'bg-yellow-950/80 border-yellow-400 text-yellow-100';
+                        if (wine.wineType === 'Sparkling') style = 'bg-amber-950/80 border-gold-400 text-gold-300';
+                        if (wine.wineType === 'Rosé') style = 'bg-pink-950/80 border-pink-400 text-pink-100';
+
+                        rowHtml += `
+                            <div id="${slotId}"
+                                class="rack-slot flex-1 min-w-0 h-14 rounded-xl relative"
+                                data-row="${r}" data-col="${c}"
+                                ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)"
+                                ondrop="handleDrop(event, '${r}', '${c}')">
+                                <div draggable="true"
+                                    data-wine-id="${wine.id}"
+                                    ondragstart="handleDragStart(event, '${wine.id}')"
+                                    ondragend="handleDragEnd(event)"
+                                    onclick="openEditWineModal('${wine.id}')"
+                                    class="w-full h-full rounded-xl border flex flex-col items-center justify-center px-1 overflow-hidden transition-all duration-200 shadow-md cursor-grab active:cursor-grabbing ${style} hover:ring-2 hover:ring-gold-400/40 select-none">
+                                    <span class="text-[9px] font-serif font-bold truncate w-full text-center leading-tight text-white pointer-events-none">${wine.wineName}</span>
+                                    <span class="text-[8px] text-gray-400 truncate w-full text-center pointer-events-none">${wine.vintage} &bull; $${wine.estimatedValue}</span>
+                                </div>
+                            </div>`;
+                    } else {
+                        rowHtml += `
+                            <div id="${slotId}"
+                                class="rack-slot flex-1 min-w-0 h-14 rounded-xl"
+                                data-row="${r}" data-col="${c}"
+                                ondragover="handleDragOver(event)"
+                                ondragleave="handleDragLeave(event)"
+                                ondrop="handleDrop(event, '${r}', '${c}')">
+                                <button onclick="openAddWineModalAtSlot('${r}', '${c}')"
+                                    class="w-full h-full rounded-xl border border-dashed border-gray-800 hover:border-gold-500/30 bg-dark-900/40 hover:bg-dark-800/40 flex flex-col items-center justify-center text-gray-600 hover:text-gold-500 transition-all duration-300">
+                                    <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                    <span class="text-[8px] tracking-widest mt-1 uppercase">Empty</span>
+                                </button>
+                            </div>`;
+                    }
+                });
+
+                rowHtml += '</div>';
+                matrix.innerHTML += rowHtml;
+            });
+        }
+
+        // --- Drag and Drop handlers ---
+        let draggedWineId = null;
+
+        function handleDragStart(event, wineId) {
+            draggedWineId = wineId;
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', wineId);
+            // Fade the dragged element
+            setTimeout(() => event.target.style.opacity = '0.4', 0);
+        }
+
+        function handleDragEnd(event) {
+            event.target.style.opacity = '1';
+            // Clear all drop highlights
+            document.querySelectorAll('.rack-slot').forEach(slot => {
+                slot.classList.remove('ring-2', 'ring-gold-400', 'bg-gold-500/10', 'ring-rose-400', 'bg-rose-500/10');
+            });
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+            const slot = event.currentTarget;
+            const row = slot.dataset.row;
+            const col = slot.dataset.col;
+            const occupant = cellarInventory.find(w => w.rackRow === row && w.rackCol === col);
+            const dragged = cellarInventory.find(w => w.id === draggedWineId);
+
+            // Don't highlight if dragging over itself
+            if (occupant && occupant.id === draggedWineId) return;
+
+            slot.classList.add('ring-2');
+            if (occupant) {
+                // Occupied — will swap
+                slot.classList.add('ring-rose-400', 'bg-rose-500/10');
+            } else {
+                // Empty — will move
+                slot.classList.add('ring-gold-400', 'bg-gold-500/10');
+            }
+        }
+
+        function handleDragLeave(event) {
+            const slot = event.currentTarget;
+            slot.classList.remove('ring-2', 'ring-gold-400', 'bg-gold-500/10', 'ring-rose-400', 'bg-rose-500/10');
+        }
+
+        function handleDrop(event, targetRow, targetCol) {
+            event.preventDefault();
+            const slot = event.currentTarget;
+            slot.classList.remove('ring-2', 'ring-gold-400', 'bg-gold-500/10', 'ring-rose-400', 'bg-rose-500/10');
+
+            if (!draggedWineId) return;
+
+            const draggedWine = cellarInventory.find(w => w.id === draggedWineId);
+            if (!draggedWine) return;
+
+            // Don't drop on itself
+            if (draggedWine.rackRow === targetRow && draggedWine.rackCol === targetCol) return;
+
+            const occupant = cellarInventory.find(w => w.rackRow === targetRow && w.rackCol === targetCol);
+
+            if (occupant) {
+                // Swap positions
+                const fromRow = draggedWine.rackRow;
+                const fromCol = draggedWine.rackCol;
+                occupant.rackRow = fromRow;
+                occupant.rackCol = fromCol;
+                draggedWine.rackRow = targetRow;
+                draggedWine.rackCol = targetCol;
+                showToast(`Swapped ${draggedWine.wineName} ↔ ${occupant.wineName}`, 'success');
+            } else {
+                // Move to empty slot
+                const fromLabel = draggedWine.rackRow && draggedWine.rackCol
+                    ? `${draggedWine.rackRow}${draggedWine.rackCol}` : 'unassigned';
+                draggedWine.rackRow = targetRow;
+                draggedWine.rackCol = targetCol;
+                showToast(`Moved ${draggedWine.wineName} → ${targetRow}${targetCol}`, 'success');
+            }
+
+            draggedWineId = null;
+            saveToLocalStorage();
+            renderRackMatrix();
+        }
+
+        function resetCellarRacks() {
+            showCustomConfirm("Clear coordinates for all wines in your physical racks? Bottles remain cataloged but will not be placed on visual shelves.", () => {
+                cellarInventory.forEach(w => {
+                    w.rackRow = '';
+                    w.rackCol = '';
+                });
+                saveToLocalStorage();
+                renderRackMatrix();
+                showToast("Cellar coordinates wiped from physical shelves.", "info");
+            });
+        }
+
+        async function analyzeDrinkWindow() {
+            const winery  = document.getElementById('form-winery').value.trim();
+            const name    = document.getElementById('form-name').value.trim();
+            const vintage = document.getElementById('form-vintage').value.trim();
+            const type    = document.getElementById('form-type').value.trim();
+            const grape   = document.getElementById('form-grape').value.trim();
+            const region  = document.getElementById('form-region').value.trim();
+
+            if (!name || !vintage) return;
+
+            // Use cached data if available
+            const wineId = document.getElementById('wine-id-field').value;
+            if (wineId) {
+                const wine = cellarInventory.find(w => w.id === wineId);
+                if (wine && wine.drinkStatus) {
+                    renderDrinkWindow(wine.drinkStatus, wine.drinkWindowStart, wine.drinkWindowEnd, wine.drinkReason);
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('btn-drink-window');
+            if (btn) { btn.innerHTML = `<svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Analyzing...`; btn.disabled = true; }
+
+            try {
+                const systemPrompt = `You are a master sommelier specializing in wine aging. Given wine details, return ONLY a JSON object:
+{
+  "status": "Too Young|Hold|Peak Now|Drink Soon|Past Peak",
+  "windowStart": 2020,
+  "windowEnd": 2032,
+  "recommendation": "One or two sentences explaining the drinking window and what to expect."
+}
+Current year is 2026. windowStart and windowEnd must be integers. Return ONLY valid JSON, no markdown.`;
+
+                const messages = [{
+                    role: "user",
+                    content: `Analyze the drinking window for: ${winery} "${name}" ${vintage}. Type: ${type}. Grape: ${grape}. Region: ${region}.`
+                }];
+
+                const reply = await callClaudeAPI(messages, systemPrompt);
+                const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
+
+                const { status, windowStart, windowEnd, recommendation } = parsed;
+                const currentYear = 2026;
+
+                // Status pill colors
+                const pillStyles = {
+                    'Too Young':  'bg-blue-950/60 text-blue-300 border border-blue-700/40',
+                    'Hold':       'bg-indigo-950/60 text-indigo-300 border border-indigo-700/40',
+                    'Peak Now':   'bg-green-950/60 text-green-300 border border-green-600/50',
+                    'Drink Soon': 'bg-amber-950/60 text-amber-300 border border-amber-600/40',
+                    'Past Peak':  'bg-gray-800/60 text-gray-400 border border-gray-600/40',
+                };
+                const boxBorder = {
+                    'Too Young':  'border-blue-800/30 bg-blue-950/10',
+                    'Hold':       'border-indigo-800/30 bg-indigo-950/10',
+                    'Peak Now':   'border-green-700/40 bg-green-950/10',
+                    'Drink Soon': 'border-amber-700/30 bg-amber-950/10',
+                    'Past Peak':  'border-gray-700/30 bg-gray-900/20',
+                };
+                const barColor = {
+                    'Too Young':  'bg-blue-500',
+                    'Hold':       'bg-indigo-500',
+                    'Peak Now':   'bg-green-500',
+                    'Drink Soon': 'bg-amber-500',
+                    'Past Peak':  'bg-gray-500',
+                };
+
+                // Calculate bar position
+                const totalSpan = Math.max(windowEnd - windowStart, 1);
+                const nowOffset = Math.min(Math.max(currentYear - windowStart, 0), totalSpan);
+                const fillPct   = Math.round((nowOffset / totalSpan) * 100);
+                const nowPct    = fillPct;
+
+                // Update UI
+                const box = document.getElementById('drink-window-box');
+                box.className = `rounded-xl border p-4 space-y-3 ${boxBorder[status] || boxBorder['Hold']}`;
+
+                document.getElementById('drink-status-pill').className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${pillStyles[status] || pillStyles['Hold']}`;
+                document.getElementById('drink-status-pill').textContent = status;
+                document.getElementById('drink-window-range').textContent = `${windowStart} – ${windowEnd}`;
+                document.getElementById('drink-bar-start').textContent = windowStart;
+                document.getElementById('drink-bar-end').textContent = windowEnd;
+                document.getElementById('drink-bar-fill').className = `absolute h-full rounded-full transition-all duration-700 ${barColor[status] || 'bg-gold-500'} opacity-40`;
+                document.getElementById('drink-bar-fill').style.width = '100%';
+                document.getElementById('drink-bar-now').style.left = `${nowPct}%`;
+                document.getElementById('drink-window-text').textContent = recommendation;
+
+                document.getElementById('drink-window-empty').classList.add('hidden');
+                box.classList.remove('hidden');
+
+                // Persist to wine object immediately so scan cellar picks it up
+                const currentId = document.getElementById('wine-id-field').value;
+                if (currentId) {
+                    const wine = cellarInventory.find(w => w.id === currentId);
+                    if (wine) {
+                        wine.drinkStatus = status;
+                        wine.drinkWindowStart = windowStart;
+                        wine.drinkWindowEnd = windowEnd;
+                        wine.drinkReason = recommendation;
+                        saveToLocalStorage();
+                        renderRTDCarousel();
+                    }
+                }
+
+            } catch (err) {
+                console.error("Drink window error:", err);
+            } finally {
+                const btn = document.getElementById('btn-drink-window');
+                if (btn) { btn.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 3l1.5 1.5M3 5l1.5 1.5M12 3v2m0 14v2M3 12H1m20 0h-2M5.5 18.5L4 20M18.5 5.5L20 4M19 19l-7-7 2-2 7 7-2 2z"/></svg> Re-analyze`; btn.disabled = false; }
+            }
+        }
+
+        function renderDrinkWindow(status, windowStart, windowEnd, recommendation) {
+            const currentYear = 2026;
+            const pillStyles = {
+                'Too Young':  'bg-blue-950/60 text-blue-300 border border-blue-700/40',
+                'Hold':       'bg-indigo-950/60 text-indigo-300 border border-indigo-700/40',
+                'Peak Now':   'bg-green-950/60 text-green-300 border border-green-600/50',
+                'Drink Soon': 'bg-amber-950/60 text-amber-300 border border-amber-600/40',
+                'Past Peak':  'bg-gray-800/60 text-gray-400 border border-gray-600/40',
+            };
+            const boxBorder = {
+                'Too Young':  'border-blue-800/30 bg-blue-950/10',
+                'Hold':       'border-indigo-800/30 bg-indigo-950/10',
+                'Peak Now':   'border-green-700/40 bg-green-950/10',
+                'Drink Soon': 'border-amber-700/30 bg-amber-950/10',
+                'Past Peak':  'border-gray-700/30 bg-gray-900/20',
+            };
+            const barColor = {
+                'Too Young':  'bg-blue-500',
+                'Hold':       'bg-indigo-500',
+                'Peak Now':   'bg-green-500',
+                'Drink Soon': 'bg-amber-500',
+                'Past Peak':  'bg-gray-500',
+            };
+
+            const totalSpan = Math.max(windowEnd - windowStart, 1);
+            const nowOffset = Math.min(Math.max(currentYear - windowStart, 0), totalSpan);
+            const nowPct = Math.round((nowOffset / totalSpan) * 100);
+
+            const box = document.getElementById('drink-window-box');
+            box.className = `rounded-xl border p-4 space-y-3 ${boxBorder[status] || boxBorder['Hold']}`;
+            document.getElementById('drink-status-pill').className = `px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${pillStyles[status] || pillStyles['Hold']}`;
+            document.getElementById('drink-status-pill').textContent = status;
+            document.getElementById('drink-window-range').textContent = `${windowStart} – ${windowEnd}`;
+            document.getElementById('drink-bar-start').textContent = windowStart;
+            document.getElementById('drink-bar-end').textContent = windowEnd;
+            document.getElementById('drink-bar-fill').className = `absolute h-full rounded-full transition-all duration-700 ${barColor[status] || 'bg-gold-500'} opacity-40`;
+            document.getElementById('drink-bar-fill').style.width = '100%';
+            document.getElementById('drink-bar-now').style.left = `${nowPct}%`;
+            document.getElementById('drink-window-text').textContent = recommendation;
+            document.getElementById('drink-window-empty').classList.add('hidden');
+            box.classList.remove('hidden');
+        }
+
+        // ── Settings Modal ────────────────────────────────────────────
+        function openSettingsModal() {
+            document.getElementById('settings-govee-key').value = localStorage.getItem('govee_api_key') || '';
+            document.getElementById('settings-google-key').value = localStorage.getItem('google_api_key') || '';
+            document.getElementById('settings-google-cx').value = localStorage.getItem('google_cx') || '';
+            document.getElementById('settings-github-user').value = localStorage.getItem('github_user') || '';
+            document.getElementById('settings-github-repo').value = localStorage.getItem('github_repo') || '';
+            document.getElementById('settings-github-token').value = localStorage.getItem('github_token') || '';
+            document.getElementById('govee-status-msg').classList.add('hidden');
+            document.getElementById('github-status-msg').classList.add('hidden');
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function toggleGoveeKeyVisibility() {
+            const input = document.getElementById('settings-govee-key');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function saveGoveeKey() {
+            const key = document.getElementById('settings-govee-key').value.trim();
+            if (!key) { showSettingsMsg('govee-status-msg', 'Please enter your API key.', 'error'); return; }
+            localStorage.setItem('govee_api_key', key);
+            showSettingsMsg('govee-status-msg', 'Connecting to Govee...', 'info');
+            goveeDeviceId = null;
+            await initGovee();
+            const hasError = !document.getElementById('govee-error').classList.contains('hidden');
+            showSettingsMsg('govee-status-msg',
+                hasError ? 'Key saved but sensor not responding — check dashboard for details.' : '✓ Connected! Sensor data loading on dashboard.',
+                hasError ? 'error' : 'success');
+        }
+
+        function saveGitHubSettings() {
+            const user  = document.getElementById('settings-github-user').value.trim();
+            const repo  = document.getElementById('settings-github-repo').value.trim();
+            const token = document.getElementById('settings-github-token').value.trim();
+            if (!user || !repo || !token) {
+                showSettingsMsg('github-status-msg', 'Please fill in all three fields.', 'error');
+                return;
+            }
+            localStorage.setItem('github_user', user);
+            localStorage.setItem('github_repo', repo);
+            localStorage.setItem('github_token', token);
+            showSettingsMsg('github-status-msg', '✓ GitHub settings saved! The Push button will appear in the nav.', 'success');
+            document.getElementById('btn-github-push').classList.remove('hidden');
+            document.getElementById('btn-github-push').classList.add('flex');
+        }
+
+        function toggleTokenVisibility() {
+            const input = document.getElementById('settings-github-token');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        async function pushToGitHub() {
+            const user  = localStorage.getItem('github_user');
+            const repo  = localStorage.getItem('github_repo');
+            const token = localStorage.getItem('github_token');
+            if (!user || !repo || !token) {
+                showToast('Set up GitHub in Settings first.', 'error');
+                openSettingsModal();
+                return;
+            }
+
+            const btn = document.getElementById('btn-github-push');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> <span class="hidden sm:inline">Pushing...</span>`;
+            btn.disabled = true;
+
+            try {
+                const apiBase = `https://api.github.com/repos/${user}/${repo}/contents/index.html`;
+
+                // Get current file SHA (needed for updates)
+                let sha = null;
+                const existing = await fetch(apiBase, {
+                    headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+                });
+                if (existing.ok) {
+                    const data = await existing.json();
+                    sha = data.sha;
+                }
+
+                // Encode current page HTML as base64
+                const html = document.documentElement.outerHTML;
+                const b64 = btoa(unescape(encodeURIComponent(html)));
+
+                // Push to GitHub
+                const body = {
+                    message: `Update Basement Reserve — ${new Date().toLocaleString()}`,
+                    content: b64,
+                    ...(sha ? { sha } : {})
+                };
+
+                const res = await fetch(apiBase, {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `token ${token}`,
+                        Accept: 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.message || `GitHub error ${res.status}`);
+                }
+
+                showToast('✓ Pushed to GitHub Pages! Live in ~30 seconds.', 'success');
+
+            } catch (err) {
+                console.error('GitHub push error:', err);
+                showToast('Push failed: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+            }
+        }
+
+        function saveGoogleKeys() {
+            const key = document.getElementById('settings-google-key').value.trim();
+            const cx  = document.getElementById('settings-google-cx').value.trim();
+            if (key) localStorage.setItem('google_api_key', key);
+            if (cx)  localStorage.setItem('google_cx', cx);
+            showToast('Google settings saved!', 'success');
+            closeSettingsModal();
+        }
+
+        function showSettingsMsg(id, msg, type) {
+            const el = document.getElementById(id);
+            const styles = { success: 'bg-green-950/60 text-green-300 border border-green-700/30', error: 'bg-rose-950/60 text-rose-300 border border-rose-700/30', info: 'bg-blue-950/60 text-blue-300 border border-blue-700/30' };
+            el.className = `text-[11px] rounded-lg px-3 py-2 ${styles[type]}`;
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+        // ─────────────────────────────────────────────────────────────
+
+        // ── Govee Cellar Conditions ──────────────────────────────────
+        let goveeDeviceId = null;
+        function getGoveeKey() { return localStorage.getItem('govee_api_key') || ''; }
+
+        async function initGovee() {
+            if (!getGoveeKey()) {
+                showGoveeError("No API key set — open Settings (⚙) to add your Govee key.");
+                return;
+            }
+            try {
+                // Step 1: get device list to find H5179 MAC address
+                const res = await fetch("https://openapi.api.govee.com/router/api/v1/user/devices", {
+                    headers: { "Govee-API-Key": getGoveeKey(), "Content-Type": "application/json" }
+                });
+                const data = await res.json();
+                const devices = data.data || [];
+                const sensor = devices.find(d => d.sku === "H5179" || d.deviceName?.includes("H5179") || d.type === "devices.types.thermometer");
+                if (sensor) {
+                    goveeDeviceId = sensor.device;
+                    fetchGoveeReadings();
+                } else {
+                    showGoveeError("H5179 sensor not found in your Govee account.");
+                }
+            } catch (e) {
+                showGoveeError("Could not connect to Govee API: " + e.message);
+            }
+        }
+
+        async function fetchGoveeReadings() {
+            if (!goveeDeviceId) { initGovee(); return; }
+
+            document.getElementById('govee-loading').classList.remove('hidden');
+            document.getElementById('govee-readings').classList.add('hidden');
+            document.getElementById('govee-error').classList.add('hidden');
+
+            try {
+                const res = await fetch("https://openapi.api.govee.com/router/api/v1/device/state", {
+                    method: "POST",
+                    headers: { "Govee-API-Key": getGoveeKey(), "Content-Type": "application/json" },
+                    body: JSON.stringify({ requestId: crypto.randomUUID(), payload: { sku: "H5179", device: goveeDeviceId } })
+                });
+                const data = await res.json();
+
+                if (!res.ok || data.code !== 200) throw new Error(data.message || "API error");
+
+                const caps = data.payload?.capabilities || [];
+                let tempC = null, humidity = null;
+
+                caps.forEach(c => {
+                    if (c.instance === "sensorTemperature") tempC = c.state?.value / 100;
+                    if (c.instance === "sensorHumidity") humidity = c.state?.value / 100;
+                });
+
+                if (tempC === null && humidity === null) throw new Error("No sensor data returned.");
+
+                const tempF = tempC !== null ? (tempC * 9/5 + 32).toFixed(1) : null;
+                renderGoveeReadings(tempF, humidity);
+
+            } catch (e) {
+                showGoveeError(e.message);
+            }
+        }
+
+        function renderGoveeReadings(tempF, humidity) {
+            document.getElementById('govee-loading').classList.add('hidden');
+            document.getElementById('govee-readings').classList.remove('hidden');
+            document.getElementById('govee-updated').classList.remove('hidden');
+            document.getElementById('govee-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+            // Temperature
+            if (tempF !== null) {
+                document.getElementById('govee-temp').textContent = `${tempF}°F`;
+                const t = parseFloat(tempF);
+                const ideal = 55;
+                const diff = Math.abs(t - ideal);
+                let tColor, tLabel;
+                if (diff <= 2) { tColor = 'bg-green-500'; tLabel = '✓ Ideal'; document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-green-400'; }
+                else if (diff <= 5) { tColor = 'bg-amber-500'; tLabel = t > ideal ? 'Slightly warm' : 'Slightly cool'; document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-amber-400'; }
+                else { tColor = 'bg-rose-500'; tLabel = t > ideal ? '⚠ Too warm' : '⚠ Too cold'; document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-rose-400'; }
+                document.getElementById('govee-temp-status').textContent = tLabel;
+                document.getElementById('govee-temp-bar').className = `h-full rounded-full transition-all duration-700 ${tColor}`;
+                document.getElementById('govee-temp-bar').style.width = `${Math.min(100, (t / 80) * 100)}%`;
+            }
+
+            // Humidity
+            if (humidity !== null) {
+                document.getElementById('govee-humidity').textContent = `${humidity.toFixed(1)}%`;
+                let hColor, hLabel;
+                if (humidity >= 60 && humidity <= 70) { hColor = 'bg-green-500'; hLabel = '✓ Ideal'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-green-400'; }
+                else if (humidity >= 50 && humidity <= 80) { hColor = 'bg-amber-500'; hLabel = humidity < 60 ? 'Slightly dry' : 'Slightly humid'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-amber-400'; }
+                else { hColor = 'bg-rose-500'; hLabel = humidity < 50 ? '⚠ Too dry' : '⚠ Too humid'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-rose-400'; }
+                document.getElementById('govee-humidity-status').textContent = hLabel;
+                document.getElementById('govee-humidity-bar').className = `h-full rounded-full transition-all duration-700 ${hColor}`;
+                document.getElementById('govee-humidity-bar').style.width = `${Math.min(100, humidity)}%`;
+            }
+        }
+
+        function showGoveeError(msg) {
+            document.getElementById('govee-loading').classList.add('hidden');
+            document.getElementById('govee-readings').classList.add('hidden');
+            document.getElementById('govee-error').classList.remove('hidden');
+            document.getElementById('govee-error-msg').textContent = msg;
+        }
+        // ─────────────────────────────────────────────────────────────
+
+        function rtdScroll(dir) {
+            const carousel = document.getElementById('rtd-carousel');
+            if (carousel) carousel.scrollBy({ left: dir * 220, behavior: 'smooth' });
+        }
+
+        function renderRTDCarousel() {
+            const statusOrder = ['Peak Now', 'Drink Soon', 'Hold', 'Past Peak'];
+            const readyStatuses = ['Peak Now', 'Drink Soon'];
+            const analyzed = cellarInventory.filter(w => w.drinkStatus && w.drinkStatus !== 'Too Young');
+            const ready = analyzed.filter(w => readyStatuses.includes(w.drinkStatus));
+
+            const pill = document.getElementById('rtd-count-pill');
+            pill.textContent = `${ready.length} bottle${ready.length !== 1 ? 's' : ''}`;
+            pill.className = ready.length > 0
+                ? 'px-2.5 py-1 rounded-full bg-green-950/60 border border-green-700/40 text-green-300 text-[10px] font-bold'
+                : 'px-2.5 py-1 rounded-full bg-gray-800/60 border border-gray-700/40 text-gray-400 text-[10px] font-bold';
+
+            const carousel = document.getElementById('rtd-carousel');
+            const wrap = document.getElementById('rtd-carousel-wrap');
+            const empty = document.getElementById('rtd-empty');
+
+            if (analyzed.length === 0) {
+                wrap.classList.add('hidden');
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            empty.classList.add('hidden');
+            wrap.classList.remove('hidden');
+
+            const sorted = [...analyzed].sort((a, b) =>
+                statusOrder.indexOf(a.drinkStatus) - statusOrder.indexOf(b.drinkStatus)
+            );
+
+            const pillStyle = {
+                'Peak Now':   'bg-green-950/80 text-green-300 border-green-700/40',
+                'Drink Soon': 'bg-amber-950/80 text-amber-300 border-amber-600/40',
+                'Hold':       'bg-indigo-950/80 text-indigo-300 border-indigo-700/40',
+                'Past Peak':  'bg-gray-800/80 text-gray-400 border-gray-600/40',
+            };
+            const barColor = {
+                'Peak Now':   'bg-green-500',
+                'Drink Soon': 'bg-amber-500',
+                'Hold':       'bg-indigo-500',
+                'Past Peak':  'bg-gray-500',
+            };
+
+            carousel.innerHTML = sorted.map(w => {
+                const currentYear = 2026;
+                const start = w.drinkWindowStart || currentYear;
+                const end = w.drinkWindowEnd || currentYear;
+                const span = Math.max(end - start, 1);
+                const nowOffset = Math.min(Math.max(currentYear - start, 0), span);
+                const nowPct = Math.round((nowOffset / span) * 100);
+                const isReady = readyStatuses.includes(w.drinkStatus);
+
+                return `<div class="flex-shrink-0 w-48 snap-start bg-dark-900 rounded-xl border ${isReady ? 'border-green-800/40' : 'border-gray-800/40'} p-3.5 space-y-2.5 cursor-pointer hover:border-gold-500/30 transition-all"
+                    onclick="switchTab('catalog'); setTimeout(()=>openEditWineModal('${w.id}'),50)">
+                    <div class="flex items-start justify-between gap-1">
+                        <p class="text-[11px] font-serif font-bold text-white leading-tight line-clamp-2">${w.wineName}</p>
+                        <span class="flex-shrink-0 px-1.5 py-0.5 rounded-full text-[8px] font-bold border ${pillStyle[w.drinkStatus] || pillStyle['Hold']}">${w.drinkStatus}</span>
+                    </div>
+                    <p class="text-[9px] text-gray-500">${w.winery} &bull; ${w.vintage}</p>
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-[8px] text-gray-600">
+                            <span>${start}</span><span>${end}</span>
+                        </div>
+                        <div class="relative h-1 rounded-full bg-dark-800 overflow-hidden">
+                            <div class="absolute h-full rounded-full w-full ${barColor[w.drinkStatus] || 'bg-gold-500'} opacity-30"></div>
+                            <div class="absolute top-0 h-full w-px bg-white/70" style="left:${nowPct}%"></div>
+                        </div>
+                    </div>
+                    ${w.drinkReason ? `<p class="text-[9px] text-gray-500 leading-relaxed line-clamp-2">${w.drinkReason}</p>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        async function scanCellarDrinkWindows() {
+            if (cellarInventory.length === 0) { showToast("No bottles to scan.", "error"); return; }
+
+            const btn = document.getElementById('btn-scan-cellar');
+            const scanning = document.getElementById('rtd-scanning');
+            const empty = document.getElementById('rtd-empty');
+            const wrap = document.getElementById('rtd-carousel-wrap');
+            const bar = document.getElementById('rtd-scan-bar');
+            const status = document.getElementById('rtd-scan-status');
+
+            btn.disabled = true;
+            empty.classList.add('hidden');
+            wrap.classList.add('hidden');
+            scanning.classList.remove('hidden');
+
+            const system = `You are a master sommelier. Given a wine, return ONLY JSON:
+{"status":"Peak Now|Drink Soon|Hold|Too Young|Past Peak","windowStart":2020,"windowEnd":2030,"reason":"One sentence max."}
+Current year is 2026. Return ONLY valid JSON.`;
+
+            for (let i = 0; i < cellarInventory.length; i++) {
+                const w = cellarInventory[i];
+                const pct = Math.round(((i + 1) / cellarInventory.length) * 100);
+                bar.style.width = pct + '%';
+                status.textContent = `Analyzing ${i + 1} of ${cellarInventory.length}: ${w.wineName}...`;
+
+                try {
+                    const messages = [{ role: "user", content: `Wine: ${w.winery} "${w.wineName}" ${w.vintage}. Type: ${w.wineType}. Grape: ${w.grapeVariety}. Region: ${w.region}.` }];
+                    const reply = await callClaudeAPI(messages, system);
+                    const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
+                    w.drinkStatus = parsed.status;
+                    w.drinkWindowStart = parsed.windowStart;
+                    w.drinkWindowEnd = parsed.windowEnd;
+                    w.drinkReason = parsed.reason;
+                } catch (e) {
+                    console.warn(`Skipped ${w.wineName}:`, e.message);
+                }
+                await new Promise(r => setTimeout(r, 400));
+            }
+
+            saveToLocalStorage();
+            scanning.classList.add('hidden');
+            btn.disabled = false;
+            renderRTDCarousel();
+            showToast("Cellar scan complete!", "success");
+        }
+
+        function saveManualScore() {
+            const score = parseInt(document.getElementById('manual-score-input').value);
+            const critic = document.getElementById('manual-score-critic').value;
+            if (!score || score < 80 || score > 100) {
+                showToast("Enter a score between 80 and 100.", "error");
+                return;
+            }
+            const wineId = document.getElementById('wine-id-field').value;
+            if (!wineId) return;
+            const wine = cellarInventory.find(w => w.id === wineId);
+            if (!wine) return;
+
+            wine.criticScores = [{ critic, score, vintage: wine.vintage }];
+            wine.scoresNote = "Manually entered score.";
+            saveToLocalStorage();
+            renderScores(wine.criticScores, wine.scoresNote);
+            showToast("Score saved!", "success");
+        }
+
+        function resetScores() {
+            document.getElementById('scores-loading').classList.add('hidden');
+            document.getElementById('scores-result').classList.add('hidden');
+            document.getElementById('scores-empty').classList.add('hidden');
+        }
+
+        async function fetchCriticScores(winery, wineName, vintage) {
+            if (!wineName || !vintage) return;
+
+            // Check if already cached on the wine object
+            const wineId = document.getElementById('wine-id-field').value;
+            if (wineId) {
+                const wine = cellarInventory.find(w => w.id === wineId);
+                if (wine && wine.criticScores) {
+                    renderScores(wine.criticScores, wine.scoresNote);
+                    return;
+                }
+            }
+
+            document.getElementById('scores-loading').classList.remove('hidden');
+
+            try {
+                const system = `You are a wine critic database. Given a wine, return ONLY a JSON object with known critic scores:
+{
+  "scores": [
+    { "critic": "Wine Spectator", "score": 94, "vintage": 2021 },
+    { "critic": "James Suckling", "score": 92, "vintage": 2021 },
+    { "critic": "Vinous", "score": 93, "vintage": 2021 },
+    { "critic": "Wine Advocate", "score": 91, "vintage": 2021 },
+    { "critic": "Jeb Dunnuck", "score": 95, "vintage": 2021 }
+  ],
+  "note": "Optional short note about critical reception"
+}
+Only include critics where you have confident knowledge of an actual score for this specific wine and vintage. If you have no reliable score data, return {"scores": [], "note": "No scores on record"}. Return ONLY valid JSON.`;
+
+                const messages = [{ role: "user", content: `Critic scores for: ${winery} "${wineName}" ${vintage}` }];
+                const reply = await callClaudeAPI(messages, system);
+                const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
+
+                // Cache on wine object
+                if (wineId) {
+                    const wine = cellarInventory.find(w => w.id === wineId);
+                    if (wine) {
+                        wine.criticScores = parsed.scores || [];
+                        wine.scoresNote = parsed.note || '';
+                        saveToLocalStorage();
+                    }
+                }
+
+                renderScores(parsed.scores || [], parsed.note || '');
+
+            } catch (err) {
+                console.error("Scores fetch error:", err);
+                document.getElementById('scores-loading').classList.add('hidden');
+                document.getElementById('scores-empty').classList.remove('hidden');
+            }
+        }
+
+        function renderScores(scores, note) {
+            document.getElementById('scores-loading').classList.add('hidden');
+
+            if (!scores || scores.length === 0) {
+                document.getElementById('scores-empty').classList.remove('hidden');
+                return;
+            }
+
+            const grid = document.getElementById('scores-grid');
+            grid.innerHTML = scores.map(s => {
+                const score = s.score;
+                const color = score >= 95 ? 'text-green-300 border-green-700/40 bg-green-950/30'
+                    : score >= 90 ? 'text-gold-300 border-gold-700/40 bg-gold-950/20'
+                    : score >= 85 ? 'text-amber-300 border-amber-700/40 bg-amber-950/20'
+                    : 'text-gray-400 border-gray-700/40 bg-gray-900/20';
+
+                return `<div class="rounded-xl border p-2.5 ${color} flex flex-col items-center gap-0.5">
+                    <span class="text-xl font-bold font-serif leading-none">${score}</span>
+                    <span class="text-[9px] font-semibold text-center leading-tight opacity-80">${s.critic}</span>
+                    ${s.vintage ? `<span class="text-[8px] opacity-50">${s.vintage}</span>` : ''}
+                </div>`;
+            }).join('');
+
+            if (note) document.getElementById('scores-note').textContent = note;
+            document.getElementById('scores-result').classList.remove('hidden');
+        }
+
+        function resetDrinkWindow() {
+            document.getElementById('drink-window-box').classList.add('hidden');
+            document.getElementById('drink-window-empty').classList.remove('hidden');
+        }
+
+        async function lookupWineryWebsite() {
+            const winery = document.getElementById('form-winery').value.trim();
+            const region = document.getElementById('form-region').value.trim();
+            if (!winery) { showToast("Enter a winery name first.", "error"); return; }
+
+            const btn = event.currentTarget;
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>`;
+            btn.disabled = true;
+
+            try {
+                const system = `You are a wine research assistant. Given a winery name, return ONLY a JSON object: {"url": "https://www.example.com"}. 
+The URL must be the winery's official website homepage. If you are not confident of the exact URL, return {"url": null}. No markdown, no explanation.`;
+                const messages = [{ role: "user", content: `What is the official website URL for the winery: "${winery}"${region ? ` located in ${region}` : ''}?` }];
+                const reply = await callClaudeAPI(messages, system);
+                const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
+
+                if (parsed.url) {
+                    document.getElementById('form-website').value = parsed.url;
+                    showToast("Winery website found!", "success");
+                } else {
+                    showToast("Couldn't find website — try entering it manually.", "error");
+                }
+            } catch (e) {
+                showToast("Lookup failed: " + e.message, "error");
+            } finally {
+                btn.innerHTML = orig;
+                btn.disabled = false;
+            }
+        }
+
+        function showToast(message, type = "success") {
+            const wrapper = document.getElementById('toast-wrapper');
+            if (!wrapper) return;
+
+            const toast = document.createElement('div');
+            toast.className = "flex items-center gap-3 px-4 py-3 rounded-xl border text-xs font-semibold shadow-lg transition-all duration-300 transform translate-y-2 opacity-0";
+            
+            let icon = `<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M9 12l2 2 4-4"/></svg>`;
+            if (type === "success") {
+                toast.className += " bg-emerald-950 border-emerald-800 text-emerald-300";
+            } else if (type === "error") {
+                toast.className += " bg-rose-950 border-rose-800 text-rose-300";
+                icon = `<svg class="w-4 h-4 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>`;
+            } else {
+                toast.className += " bg-merlot-950 border-merlot-800 text-gold-300";
+                icon = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 16v-4m0-4h.01"/></svg>`;
+            }
+
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            wrapper.appendChild(toast);
+
+            setTimeout(() => {
+                toast.className = toast.className.replace("translate-y-2 opacity-0", "translate-y-0 opacity-100");
+            }, 10);
+
+            setTimeout(() => {
+                toast.className = toast.className.replace("translate-y-0 opacity-100", "translate-y-2 opacity-0");
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+</html>
