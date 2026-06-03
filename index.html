@@ -2,8 +2,31 @@
 <html lang="en" class="h-full bg-dark-950">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Basement Reserve - Cellar Catalog</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Basement Reserve">
+    <meta name="theme-color" content="#120b0c">
+    <meta name="description" content="Personal wine cellar catalog and tracker">
+
+    <!-- PWA Icons (inline SVG as data URI) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23410a18'/><text y='72' x='50' text-anchor='middle' font-size='60'>🍷</text></svg>">
+
+    <!-- PWA Manifest (inline as data URI) -->
+    <link rel="manifest" href="data:application/json,{
+        &quot;name&quot;:&quot;Basement Reserve&quot;,
+        &quot;short_name&quot;:&quot;Basement Reserve&quot;,
+        &quot;description&quot;:&quot;Personal wine cellar catalog&quot;,
+        &quot;start_url&quot;:&quot;.&quot;,
+        &quot;display&quot;:&quot;standalone&quot;,
+        &quot;background_color&quot;:&quot;%23120b0c&quot;,
+        &quot;theme_color&quot;:&quot;%23120b0c&quot;,
+        &quot;orientation&quot;:&quot;portrait&quot;,
+        &quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23410a18'/><text y='72' x='50' text-anchor='middle' font-size='60'>🍷</text></svg>&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]
+    }">
     
     <!-- Tailwind CSS -->
     <script>
@@ -162,6 +185,26 @@
                         Save & Connect
                     </button>
                 </div>
+                <!-- Export / Import -->
+                <div class="border-t border-gray-800 pt-5 space-y-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Cellar Data</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Export your cellar to transfer to another device, or import a previously saved backup.</p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="exportCellarData()" class="py-2.5 flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            Export Cellar
+                        </button>
+                        <button onclick="document.getElementById('import-file-input').click()" class="py-2.5 flex items-center justify-center gap-2 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            Import Cellar
+                        </button>
+                    </div>
+                    <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importCellarData(event)">
+                    <div id="import-status" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
+                </div>
+
                 <!-- GitHub Sync -->
                 <div class="border-t border-gray-800 pt-5 space-y-3">
                     <div>
@@ -191,6 +234,10 @@
                     <div id="github-status-msg" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
                     <button onclick="saveGitHubSettings()" class="w-full py-2.5 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
                         Save GitHub Settings
+                    </button>
+                    <button onclick="pushToGitHub()" id="btn-github-push-settings" class="w-full py-2.5 flex items-center justify-center gap-2 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold border border-gold-500/20 transition-all active:scale-95">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                        Push to GitHub Pages
                     </button>
                 </div>
                     <div>
@@ -266,10 +313,6 @@
                     <button onclick="openSettingsModal()" class="p-2 text-gray-500 hover:text-white bg-dark-900 border border-gray-800 rounded-lg transition-colors" title="Settings">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
                     </button>
-                    <button onclick="pushToGitHub()" id="btn-github-push" class="hidden items-center gap-1.5 px-3 py-2 bg-dark-900 border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-white rounded-lg text-xs font-bold transition-all active:scale-95" title="Push to GitHub Pages">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                        <span class="hidden sm:inline">Push to GitHub</span>
-                    </button>
                 </div>
             </div>
 
@@ -323,66 +366,6 @@
                         <div class="bg-dark-800 p-6 rounded-2xl border border-merlot-950/20 shadow-lg relative overflow-hidden group transition-all hover:border-merlot-900/40">
                             <p class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">AVAs & Regions</p>
                             <p id="stat-regions" class="text-3xl font-serif font-bold text-white mt-1.5">0</p>
-                        </div>
-                    </div>
-
-                    <!-- Cellar Conditions Widget -->
-                    <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
-                        <div class="p-5 flex items-center justify-between border-b border-gray-800/60">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-950/60 border border-blue-700/40 flex items-center justify-center flex-shrink-0">
-                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1-.3-3.4 1.3a11.5 11.5 0 00-6.2 0C6.5 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
-                                </div>
-                                <div>
-                                    <h3 class="font-sans text-base font-bold text-white leading-tight">Cellar Conditions</h3>
-                                    <p class="text-[10px] text-gray-400 mt-0.5">Live temperature & humidity via Govee H5179</p>
-                                </div>
-                            </div>
-                            <button onclick="fetchGoveeReadings()" id="btn-refresh-govee" class="text-[10px] text-gray-500 hover:text-gold-400 font-bold bg-dark-900 border border-gray-800 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                Refresh
-                            </button>
-                        </div>
-
-                        <div class="p-5">
-                            <!-- Loading -->
-                            <div id="govee-loading" class="flex items-center gap-2 text-[11px] text-gray-500">
-                                <svg class="w-3.5 h-3.5 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                                Connecting to sensor...
-                            </div>
-
-                            <!-- Readings -->
-                            <div id="govee-readings" class="hidden grid grid-cols-2 gap-4">
-                                <!-- Temperature -->
-                                <div class="bg-dark-900 rounded-xl border border-gray-800 p-4 space-y-2">
-                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Temperature</p>
-                                    <p id="govee-temp" class="text-3xl font-bold text-white">--°F</p>
-                                    <div id="govee-temp-status" class="text-[10px] font-semibold"></div>
-                                    <div class="w-full h-1 rounded-full bg-dark-800 overflow-hidden">
-                                        <div id="govee-temp-bar" class="h-full rounded-full transition-all duration-700" style="width:0%"></div>
-                                    </div>
-                                    <p class="text-[9px] text-gray-600">Ideal: 55°F</p>
-                                </div>
-                                <!-- Humidity -->
-                                <div class="bg-dark-900 rounded-xl border border-gray-800 p-4 space-y-2">
-                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Humidity</p>
-                                    <p id="govee-humidity" class="text-3xl font-bold text-white">--%</p>
-                                    <div id="govee-humidity-status" class="text-[10px] font-semibold"></div>
-                                    <div class="w-full h-1 rounded-full bg-dark-800 overflow-hidden">
-                                        <div id="govee-humidity-bar" class="h-full rounded-full transition-all duration-700" style="width:0%"></div>
-                                    </div>
-                                    <p class="text-[9px] text-gray-600">Ideal: 60–70%</p>
-                                </div>
-                            </div>
-
-                            <!-- Error -->
-                            <div id="govee-error" class="hidden text-[11px] text-gray-500 space-y-1">
-                                <p id="govee-error-msg"></p>
-                                <p class="text-[10px] text-gray-600">Check your API key or sensor connection.</p>
-                            </div>
-
-                            <!-- Last updated -->
-                            <p id="govee-updated" class="hidden text-[9px] text-gray-700 mt-3"></p>
                         </div>
                     </div>
 
@@ -452,6 +435,67 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Cellar Conditions Widget -->
+                    <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
+                        <div class="p-5 flex items-center justify-between border-b border-gray-800/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-950/60 border border-blue-700/40 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 00-1.3-3.2 4.2 4.2 0 00-.1-3.2s-1-.3-3.4 1.3a11.5 11.5 0 00-6.2 0C6.5 2.8 5.5 3.1 5.5 3.1a4.2 4.2 0 00-.1 3.2A4.6 4.6 0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-sans text-base font-bold text-white leading-tight">Cellar Conditions</h3>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">Live temperature & humidity via Govee H5179</p>
+                                </div>
+                            </div>
+                            <button onclick="fetchGoveeReadings()" id="btn-refresh-govee" class="text-[10px] text-gray-500 hover:text-gold-400 font-bold bg-dark-900 border border-gray-800 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Refresh
+                            </button>
+                        </div>
+
+                        <div class="p-5">
+                            <!-- Loading -->
+                            <div id="govee-loading" class="flex items-center gap-2 text-[11px] text-gray-500">
+                                <svg class="w-3.5 h-3.5 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                Connecting to sensor...
+                            </div>
+
+                            <!-- Readings -->
+                            <div id="govee-readings" class="hidden grid grid-cols-2 gap-4">
+                                <!-- Temperature -->
+                                <div class="bg-dark-900 rounded-xl border border-gray-800 p-4 space-y-2">
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Temperature</p>
+                                    <p id="govee-temp" class="text-3xl font-bold text-white">--°F</p>
+                                    <div id="govee-temp-status" class="text-[10px] font-semibold"></div>
+                                    <div class="w-full h-1 rounded-full bg-dark-800 overflow-hidden">
+                                        <div id="govee-temp-bar" class="h-full rounded-full transition-all duration-700" style="width:0%"></div>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">Ideal: 55°F</p>
+                                </div>
+                                <!-- Humidity -->
+                                <div class="bg-dark-900 rounded-xl border border-gray-800 p-4 space-y-2">
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-semibold">Humidity</p>
+                                    <p id="govee-humidity" class="text-3xl font-bold text-white">--%</p>
+                                    <div id="govee-humidity-status" class="text-[10px] font-semibold"></div>
+                                    <div class="w-full h-1 rounded-full bg-dark-800 overflow-hidden">
+                                        <div id="govee-humidity-bar" class="h-full rounded-full transition-all duration-700" style="width:0%"></div>
+                                    </div>
+                                    <p class="text-[9px] text-gray-600">Ideal: 60–70%</p>
+                                </div>
+                            </div>
+
+                            <!-- Error -->
+                            <div id="govee-error" class="hidden text-[11px] text-gray-500 space-y-1">
+                                <p id="govee-error-msg"></p>
+                                <p class="text-[10px] text-gray-600">Check your API key or sensor connection.</p>
+                            </div>
+
+                            <!-- Last updated -->
+                            <p id="govee-updated" class="hidden text-[9px] text-gray-700 mt-3"></p>
+                        </div>
+                    </div>
+
                 </section>
 
                 <!-- Tab: Catalog Section -->
@@ -482,11 +526,11 @@
                             <!-- View toggle -->
                             <div class="flex items-center bg-dark-900 border border-merlot-950/40 rounded-xl p-1 gap-1">
                                 <button id="view-btn-grid" onclick="setCatalogView('grid')" title="Card view"
-                                    class="p-1.5 rounded-lg bg-merlot-900 text-white transition-all">
+                                    class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-all">
                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></svg>
                                 </button>
                                 <button id="view-btn-list" onclick="setCatalogView('list')" title="List view"
-                                    class="p-1.5 rounded-lg text-gray-500 hover:text-white transition-all">
+                                    class="p-1.5 rounded-lg bg-merlot-900 text-white transition-all">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                                 </button>
                             </div>
@@ -787,7 +831,7 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Personal Rating</label>
                             <select id="form-rating" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
@@ -798,35 +842,18 @@
                                 <option value="1">★☆☆☆☆ Poor (1/5)</option>
                             </select>
                         </div>
-
                         <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Rack Location (Row)</label>
-                            <select id="form-rack-row" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
-                                <option value="">Unassigned</option>
-                                <option value="A">Row A</option>
-                                <option value="B">Row B</option>
-                                <option value="C">Row C</option>
-                                <option value="D">Row D</option>
-                                <option value="E">Row E</option>
-                                <option value="F">Row F</option>
-                            </select>
+                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Rack Position</label>
+                            <div class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-400 flex items-center justify-between">
+                                <span id="rack-position-display">Auto-assigned on save</span>
+                                <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                            </div>
+                            <p class="text-[9px] text-gray-600 mt-1">Use drag & drop on the Rack Map to reposition</p>
+                            <!-- Hidden inputs kept for JS compatibility -->
+                            <input type="hidden" id="form-rack-row">
+                            <input type="hidden" id="form-rack-col">
                         </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">Rack Location (Col)</label>
-                            <select id="form-rack-col" class="w-full bg-dark-900 border border-merlot-950/40 rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50 cursor-pointer">
-                                <option value="">Unassigned</option>
-                                <option value="1">Column 1</option>
-                                <option value="2">Column 2</option>
-                                <option value="3">Column 3</option>
-                                <option value="4">Column 4</option>
-                                <option value="5">Column 5</option>
-                                <option value="6">Column 6</option>
-                                <option value="7">Column 7</option>
-                                <option value="8">Column 8</option>
-                                <option value="9">Column 9</option>
-                            </select>
-                        </div>
+                    </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1127,11 +1154,11 @@
 
             // Configure dialog actions
             document.getElementById('btn-confirm-cancel').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.add('hidden');
+                hide('custom-confirm-modal');
                 confirmCallback = null;
             };
             document.getElementById('btn-confirm-accept').onclick = () => {
-                document.getElementById('custom-confirm-modal').classList.add('hidden');
+                hide('custom-confirm-modal');
                 if (confirmCallback) {
                     confirmCallback();
                     confirmCallback = null;
@@ -1143,6 +1170,7 @@
             renderCatalog();
             renderRackMatrix();
             initGovee();
+            autoAssignAllUnassigned();
 
             // Show GitHub push button if already configured
             if (localStorage.getItem('github_token')) {
@@ -1156,10 +1184,40 @@
         function showCustomConfirm(message, action) {
             document.getElementById('confirm-modal-text').innerText = message;
             confirmCallback = action;
-            document.getElementById('custom-confirm-modal').classList.remove('hidden');
+            show('custom-confirm-modal');
         }
 
         // Save layout state helper
+        function autoAssignRack(wine) {
+            const rows = ['A', 'B', 'C', 'D', 'E', 'F'];
+            const cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+            for (const r of rows) {
+                for (const c of cols) {
+                    const occupied = cellarInventory.some(w => w.id !== wine.id && w.rackRow === r && w.rackCol === c);
+                    if (!occupied) {
+                        wine.rackRow = r;
+                        wine.rackCol = c;
+                        return;
+                    }
+                }
+            }
+        }
+
+        function autoAssignAllUnassigned() {
+            let assigned = 0;
+            cellarInventory.forEach(wine => {
+                if (!wine.rackRow || !wine.rackCol) {
+                    autoAssignRack(wine);
+                    assigned++;
+                }
+            });
+            if (assigned > 0) {
+                saveToLocalStorage();
+                renderRackMatrix();
+                renderDashboard();
+            }
+        }
+
         function saveToLocalStorage() {
             localStorage.setItem("basement_reserve_collection_2026", JSON.stringify(cellarInventory));
         }
@@ -1202,14 +1260,14 @@
             reader.onload = function(e) {
                 const b64 = e.target.result;
                 
-                document.getElementById('upload-prompt').classList.add('hidden');
-                document.getElementById('image-preview-container').classList.remove('hidden');
+                hide('upload-prompt');
+                show('image-preview-container');
                 document.getElementById('label-image-preview').src = b64;
-                document.getElementById('btn-remove-photo').classList.remove('hidden');
+                show('btn-remove-photo');
                 
                 document.getElementById('wine-photo-b64-field').value = file.name;
                 window._lastUploadedImageDataUri = b64;
-                document.getElementById('btn-scan-label').classList.remove('hidden');
+                show('btn-scan-label');
 
                 // Auto-trigger AI label scan immediately
                 analyzeWineLabel();
@@ -1227,9 +1285,9 @@
             imgEl.src = "#";
             imgEl.style.opacity = '1';
             imgEl.style.display = '';
-            document.getElementById('image-preview-container').classList.add('hidden');
-            document.getElementById('upload-prompt').classList.remove('hidden');
-            document.getElementById('btn-remove-photo').classList.add('hidden');
+            hide('image-preview-container');
+            show('upload-prompt');
+            hide('btn-remove-photo');
             const scanBtn = document.getElementById('btn-scan-label');
             if (scanBtn) scanBtn.classList.add('hidden');
             // Clean up any injected loaders or fallback cards
@@ -1389,7 +1447,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
 
                 if (researchedValueCache) {
                     document.getElementById('btn-apply-intel-price').innerText = `Apply Price ($${researchedValueCache})`;
-                    document.getElementById('btn-apply-intel-price').classList.remove('hidden');
+                    show('btn-apply-intel-price');
                 }
 
                 intelText.innerHTML = `<strong>Market Intelligence:</strong> ${parsed.summary || reply}`;
@@ -1420,12 +1478,12 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             document.getElementById('modal-title').innerText = "Catalog New Bottle";
             document.getElementById('wine-form').reset();
             document.getElementById('wine-id-field').value = "";
-            document.getElementById('btn-delete-wine').classList.add('hidden');
-            document.getElementById('market-intel-box').classList.add('hidden');
+            hide('btn-delete-wine');
+            hide('market-intel-box');
             researchedValueCache = null;
             
             clearWinePhoto();
-            document.getElementById('add-wine-modal').classList.remove('hidden');
+            show('add-wine-modal');
         }
 
         function openAddWineModalAtSlot(row, col) {
@@ -1443,7 +1501,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
 
             document.getElementById('modal-title').innerText = "Modify Wine Profile";
             document.getElementById('wine-id-field').value = wine.id;
-            document.getElementById('market-intel-box').classList.add('hidden');
+            hide('market-intel-box');
             researchedValueCache = null;
 
             document.getElementById('form-winery').value = wine.winery || "";
@@ -1458,6 +1516,12 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             document.getElementById('form-rating').value = wine.rating || "5";
             document.getElementById('form-rack-row').value = wine.rackRow || "";
             document.getElementById('form-rack-col').value = wine.rackCol || "";
+            const rackDisplay = document.getElementById('rack-position-display');
+            if (rackDisplay) {
+                rackDisplay.textContent = wine.rackRow && wine.rackCol
+                    ? `Row ${wine.rackRow}, Column ${wine.rackCol}`
+                    : 'Auto-assigned on save';
+            }
             document.getElementById('form-notes').value = wine.tastingNotes || "";
             document.getElementById('form-pairing').value = wine.foodPairing || "";
             document.getElementById('form-website').value = wine.wineryWebsite || "";
@@ -1472,15 +1536,15 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
 
             // If wine has a real stored image URL, show it immediately
             if (wine.image && !wine.image.startsWith('IMG')) {
-                document.getElementById('upload-prompt').classList.add('hidden');
-                document.getElementById('image-preview-container').classList.remove('hidden');
+                hide('upload-prompt');
+                show('image-preview-container');
                 document.getElementById('label-image-preview').src = wine.image;
                 document.getElementById('wine-photo-b64-field').value = wine.image;
-                document.getElementById('btn-remove-photo').classList.remove('hidden');
+                show('btn-remove-photo');
             } else {
                 // Show loading state and auto-fetch wine photo
-                document.getElementById('upload-prompt').classList.add('hidden');
-                document.getElementById('image-preview-container').classList.remove('hidden');
+                hide('upload-prompt');
+                show('image-preview-container');
                 document.getElementById('label-image-preview').src = "";
                 document.getElementById('label-image-preview').alt = "Searching for wine photo...";
                 document.getElementById('wine-photo-b64-field').value = wine.image || "";
@@ -1497,8 +1561,8 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
                 fetchWinePhoto(wine.winery, wine.wineName, wine.vintage, wine.id);
             }
 
-            document.getElementById('btn-delete-wine').classList.remove('hidden');
-            document.getElementById('add-wine-modal').classList.remove('hidden');
+            show('btn-delete-wine');
+            show('add-wine-modal');
         }
 
         async function fetchWinePhoto(winery, wineName, vintage, wineId) {
@@ -1531,7 +1595,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
         }
 
         function closeAddWineModal() {
-            document.getElementById('add-wine-modal').classList.add('hidden');
+            hide('add-wine-modal');
         }
 
         function saveWine(event) {
@@ -1575,6 +1639,11 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
                 drinkReason: existingWine ? existingWine.drinkReason : undefined,
                 image: photoField || "IMG_0761.jpeg"
             };
+
+            // Auto-assign rack position if none selected
+            if (!entry.rackRow || !entry.rackCol) {
+                autoAssignRack(entry);
+            }
 
             // Shelf conflict verification
             if (entry.rackRow && entry.rackCol) {
@@ -1814,12 +1883,12 @@ ${inventoryContext}`;
         }
 
         function switchTab(tabName) {
-            document.getElementById('tab-dashboard').classList.add('hidden');
-            document.getElementById('tab-catalog').classList.add('hidden');
-            document.getElementById('tab-rack').classList.add('hidden');
-            document.getElementById('tab-sommelier').classList.add('hidden');
+            hide('tab-dashboard');
+            hide('tab-catalog');
+            hide('tab-rack');
+            hide('tab-sommelier');
 
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const _tab = document.getElementById(`tab-${tabName}`); if (_tab) _tab.classList.remove('hidden');
 
             const tabs = ['dashboard', 'catalog', 'rack', 'sommelier'];
             tabs.forEach(t => {
@@ -1883,7 +1952,7 @@ ${inventoryContext}`;
             renderRTDCarousel();
         }
 
-        let catalogView = 'grid';
+        let catalogView = 'list';
 
         function setCatalogView(view) {
             catalogView = view;
@@ -1972,7 +2041,7 @@ ${inventoryContext}`;
 
             if (!filtered.length) {
                 grid.innerHTML = '';
-                document.getElementById('wine-catalog-list').classList.add('hidden');
+                hide('wine-catalog-list');
                 grid.classList.remove('hidden');
                 if (empty) empty.classList.remove('hidden');
                 return;
@@ -1985,7 +2054,7 @@ ${inventoryContext}`;
                 return;
             }
 
-            document.getElementById('wine-catalog-list').classList.add('hidden');
+            hide('wine-catalog-list');
             grid.classList.remove('hidden');
             grid.innerHTML = '';
             filtered.forEach(w => {
@@ -2300,7 +2369,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 document.getElementById('drink-bar-now').style.left = `${nowPct}%`;
                 document.getElementById('drink-window-text').textContent = recommendation;
 
-                document.getElementById('drink-window-empty').classList.add('hidden');
+                hide('drink-window-empty');
                 box.classList.remove('hidden');
 
                 // Persist to wine object immediately so scan cellar picks it up
@@ -2364,7 +2433,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             document.getElementById('drink-bar-fill').style.width = '100%';
             document.getElementById('drink-bar-now').style.left = `${nowPct}%`;
             document.getElementById('drink-window-text').textContent = recommendation;
-            document.getElementById('drink-window-empty').classList.add('hidden');
+            hide('drink-window-empty');
             box.classList.remove('hidden');
         }
 
@@ -2376,13 +2445,17 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             document.getElementById('settings-github-user').value = localStorage.getItem('github_user') || '';
             document.getElementById('settings-github-repo').value = localStorage.getItem('github_repo') || '';
             document.getElementById('settings-github-token').value = localStorage.getItem('github_token') || '';
-            document.getElementById('govee-status-msg').classList.add('hidden');
-            document.getElementById('github-status-msg').classList.add('hidden');
-            document.getElementById('settings-modal').classList.remove('hidden');
+            const goveeMsg = document.getElementById('govee-status-msg');
+            const githubMsg = document.getElementById('github-status-msg');
+            const importMsg = document.getElementById('import-status');
+            if (goveeMsg) goveeMsg.classList.add('hidden');
+            if (githubMsg) githubMsg.classList.add('hidden');
+            if (importMsg) importMsg.classList.add('hidden');
+            show('settings-modal');
         }
 
         function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
+            hide('settings-modal');
         }
 
         function toggleGoveeKeyVisibility() {
@@ -2397,10 +2470,68 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             showSettingsMsg('govee-status-msg', 'Connecting to Govee...', 'info');
             goveeDeviceId = null;
             await initGovee();
-            const hasError = !document.getElementById('govee-error').classList.contains('hidden');
+            const _ge = document.getElementById('govee-error'); const hasError = _ge ? !_ge.classList.contains('hidden') : true;
             showSettingsMsg('govee-status-msg',
                 hasError ? 'Key saved but sensor not responding — check dashboard for details.' : '✓ Connected! Sensor data loading on dashboard.',
                 hasError ? 'error' : 'success');
+        }
+
+        function exportCellarData() {
+            const data = {
+                exportedAt: new Date().toISOString(),
+                version: 1,
+                cellar: cellarInventory
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `basement-reserve-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Cellar exported successfully!', 'success');
+        }
+
+        function importCellarData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const imported = data.cellar || data;
+
+                    if (!Array.isArray(imported) || imported.length === 0) {
+                        throw new Error('No cellar data found in file.');
+                    }
+
+                    // Confirm before overwriting
+                    showCustomConfirm(
+                        `Import ${imported.length} bottles? This will replace your current cellar of ${cellarInventory.length} bottles.`,
+                        () => {
+                            cellarInventory = imported;
+                            saveToLocalStorage();
+                            renderDashboard();
+                            renderCatalog();
+                            renderRackMatrix();
+                            const status = document.getElementById('import-status');
+                            status.className = 'text-[11px] rounded-lg px-3 py-2 bg-green-950/60 text-green-300 border border-green-700/30';
+                            status.textContent = `✓ Imported ${imported.length} bottles successfully.`;
+                            status.classList.remove('hidden');
+                            showToast(`Imported ${imported.length} bottles!`, 'success');
+                        }
+                    );
+                } catch (err) {
+                    const status = document.getElementById('import-status');
+                    status.className = 'text-[11px] rounded-lg px-3 py-2 bg-rose-950/60 text-rose-300 border border-rose-700/30';
+                    status.textContent = 'Import failed: ' + err.message;
+                    status.classList.remove('hidden');
+                }
+                // Reset file input so same file can be re-imported
+                event.target.value = '';
+            };
+            reader.readAsText(file);
         }
 
         function saveGitHubSettings() {
@@ -2415,8 +2546,8 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             localStorage.setItem('github_repo', repo);
             localStorage.setItem('github_token', token);
             showSettingsMsg('github-status-msg', '✓ GitHub settings saved! The Push button will appear in the nav.', 'success');
-            document.getElementById('btn-github-push').classList.remove('hidden');
-            document.getElementById('btn-github-push').classList.add('flex');
+            show('btn-github-push');
+            const _gbtn = document.getElementById('btn-github-push'); if (_gbtn) { _gbtn.classList.remove('hidden'); _gbtn.classList.add('flex'); }
         }
 
         function toggleTokenVisibility() {
@@ -2434,10 +2565,9 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 return;
             }
 
-            const btn = document.getElementById('btn-github-push');
-            const origHTML = btn.innerHTML;
-            btn.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> <span class="hidden sm:inline">Pushing...</span>`;
-            btn.disabled = true;
+            const btn = document.getElementById('btn-github-push-settings') || document.getElementById('btn-github-push');
+            const origHTML = btn ? btn.innerHTML : '';
+            if (btn) { btn.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Pushing...`; btn.disabled = true; }
 
             try {
                 const apiBase = `https://api.github.com/repos/${user}/${repo}/contents/index.html`;
@@ -2484,8 +2614,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 console.error('GitHub push error:', err);
                 showToast('Push failed: ' + err.message, 'error');
             } finally {
-                btn.innerHTML = origHTML;
-                btn.disabled = false;
+                if (btn) { btn.innerHTML = origHTML; btn.disabled = false; }
             }
         }
 
@@ -2538,9 +2667,9 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
         async function fetchGoveeReadings() {
             if (!goveeDeviceId) { initGovee(); return; }
 
-            document.getElementById('govee-loading').classList.remove('hidden');
-            document.getElementById('govee-readings').classList.add('hidden');
-            document.getElementById('govee-error').classList.add('hidden');
+            show('govee-loading');
+            hide('govee-readings');
+            hide('govee-error');
 
             try {
                 const res = await fetch("https://openapi.api.govee.com/router/api/v1/device/state", {
@@ -2571,9 +2700,9 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
         }
 
         function renderGoveeReadings(tempF, humidity) {
-            document.getElementById('govee-loading').classList.add('hidden');
-            document.getElementById('govee-readings').classList.remove('hidden');
-            document.getElementById('govee-updated').classList.remove('hidden');
+            hide('govee-loading');
+            show('govee-readings');
+            show('govee-updated');
             document.getElementById('govee-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
 
             // Temperature
@@ -2605,9 +2734,9 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
         }
 
         function showGoveeError(msg) {
-            document.getElementById('govee-loading').classList.add('hidden');
-            document.getElementById('govee-readings').classList.add('hidden');
-            document.getElementById('govee-error').classList.remove('hidden');
+            hide('govee-loading');
+            hide('govee-readings');
+            show('govee-error');
             document.getElementById('govee-error-msg').textContent = msg;
         }
         // ─────────────────────────────────────────────────────────────
@@ -2754,10 +2883,12 @@ Current year is 2026. Return ONLY valid JSON.`;
             showToast("Score saved!", "success");
         }
 
+        // Safe element helpers — prevents null classList errors
+        const hide = (id) => { const e = document.getElementById(id); if (e) e.classList.add('hidden'); };
+        const show = (id) => { const e = document.getElementById(id); if (e) e.classList.remove('hidden'); };
+
         function resetScores() {
-            document.getElementById('scores-loading').classList.add('hidden');
-            document.getElementById('scores-result').classList.add('hidden');
-            document.getElementById('scores-empty').classList.add('hidden');
+            hide('scores-loading'); hide('scores-result'); hide('scores-empty');
         }
 
         async function fetchCriticScores(winery, wineName, vintage) {
@@ -2773,7 +2904,7 @@ Current year is 2026. Return ONLY valid JSON.`;
                 }
             }
 
-            document.getElementById('scores-loading').classList.remove('hidden');
+            show('scores-loading');
 
             try {
                 const system = `You are a wine critic database. Given a wine, return ONLY a JSON object with known critic scores:
@@ -2807,16 +2938,16 @@ Only include critics where you have confident knowledge of an actual score for t
 
             } catch (err) {
                 console.error("Scores fetch error:", err);
-                document.getElementById('scores-loading').classList.add('hidden');
-                document.getElementById('scores-empty').classList.remove('hidden');
+                hide('scores-loading');
+                show('scores-empty');
             }
         }
 
         function renderScores(scores, note) {
-            document.getElementById('scores-loading').classList.add('hidden');
+            hide('scores-loading');
 
             if (!scores || scores.length === 0) {
-                document.getElementById('scores-empty').classList.remove('hidden');
+                show('scores-empty');
                 return;
             }
 
@@ -2836,12 +2967,12 @@ Only include critics where you have confident knowledge of an actual score for t
             }).join('');
 
             if (note) document.getElementById('scores-note').textContent = note;
-            document.getElementById('scores-result').classList.remove('hidden');
+            show('scores-result');
         }
 
         function resetDrinkWindow() {
-            document.getElementById('drink-window-box').classList.add('hidden');
-            document.getElementById('drink-window-empty').classList.remove('hidden');
+            hide('drink-window-box');
+            show('drink-window-empty');
         }
 
         async function lookupWineryWebsite() {
@@ -2905,6 +3036,13 @@ The URL must be the winery's official website homepage. If you are not confident
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
+        // ── PWA Service Worker ────────────────────────────────────────
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/Basement-Reserve/sw.js', { scope: '/Basement-Reserve/' })
+                .then(() => console.log('PWA: Service worker registered'))
+                .catch(e => console.log('PWA: SW registration failed:', e));
+        }
+        // ─────────────────────────────────────────────────────────────
     </script>
 </body>
 </html>
