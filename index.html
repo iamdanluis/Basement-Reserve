@@ -239,6 +239,28 @@
                         Push to GitHub Pages
                     </button>
                 </div>
+
+                <!-- Guardian News -->
+                <div class="border-t border-gray-800 pt-5 space-y-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Wine News</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Latest wine & food news from The Guardian. Free key at open-platform.theguardian.com</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Guardian API Key</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="settings-guardian-key" placeholder="Paste your Guardian API key"
+                                class="flex-1 bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                            <button onclick="saveGuardianKey()" class="px-3 py-2 bg-gradient-to-r from-merlot-800 to-merlot-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <div id="guardian-status-msg" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
+                </div>
+
+                <!-- Google Image Search -->
+                <div class="border-t border-gray-800 pt-5 space-y-3">
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Google Image Search</h3>
                         <p class="text-[11px] text-gray-500 mt-1">Auto-fetch wine bottle photos. Requires a Google Custom Search API key and Search Engine ID.</p>
@@ -303,6 +325,19 @@
 
                 <!-- Right side actions -->
                 <div class="flex items-center gap-2 flex-shrink-0">
+                    <!-- Mini cellar conditions — desktop only, shows when data available -->
+                    <div id="nav-cellar-conditions" class="hidden lg:flex items-center gap-3 px-3 py-1.5 bg-dark-800 border border-gray-800 rounded-lg text-xs">
+                        <div class="flex items-center gap-1.5 text-blue-300">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/></svg>
+                            <span id="nav-temp">--°F</span>
+                        </div>
+                        <div class="w-px h-3 bg-gray-700"></div>
+                        <div class="flex items-center gap-1.5 text-cyan-300">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+                            <span id="nav-humidity">--%</span>
+                        </div>
+                    </div>
+
                     <button onclick="openAddWineModal()"
                         class="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-lg text-xs font-bold border border-gold-500/20 transition-all active:scale-95">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 4v16m8-8H4"/></svg>
@@ -422,7 +457,7 @@
                     </div>
 
                     <!-- Graphic charts and suggestions row -->
-                    <div class="grid grid-cols-1 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Card: Style Distribution -->
                         <div class="bg-dark-800 rounded-2xl border border-merlot-950/10 p-6 shadow-lg flex flex-col justify-between">
                             <div>
@@ -433,7 +468,6 @@
                                 <!-- Dynamic JS insertion -->
                             </div>
                         </div>
-                    </div>
 
                     <!-- Cellar Conditions Widget -->
                     <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
@@ -492,6 +526,47 @@
 
                             <!-- Last updated -->
                             <p id="govee-updated" class="hidden text-[9px] text-gray-700 mt-3"></p>
+                        </div>
+                    </div>
+                    </div><!-- end side-by-side grid -->
+
+                    <!-- Wine News Carousel -->
+                    <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
+                        <div class="p-5 flex items-center justify-between border-b border-gray-800/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-merlot-950/60 border border-merlot-700/40 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-gold-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-sans text-base font-bold text-white leading-tight">Wine News</h3>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">Latest from The Guardian Food & Drink</p>
+                                </div>
+                            </div>
+                            <button onclick="fetchWineNews()" id="btn-refresh-news" class="text-[10px] text-gray-500 hover:text-gold-400 font-bold bg-dark-900 border border-gray-800 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Refresh
+                            </button>
+                        </div>
+
+                        <div class="relative p-5">
+                            <!-- Loading -->
+                            <div id="news-loading" class="flex items-center gap-2 text-[11px] text-gray-500">
+                                <svg class="w-3.5 h-3.5 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                                Fetching latest wine news...
+                            </div>
+
+                            <!-- No key state -->
+                            <div id="news-no-key" class="hidden text-center py-4 space-y-2">
+                                <p class="text-[11px] text-gray-500">Add your Guardian API key in <button onclick="openSettingsModal()" class="text-gold-400 hover:text-gold-300 underline">Settings</button> to see wine news.</p>
+                            </div>
+
+                            <!-- News carousel -->
+                            <div id="news-carousel-wrap" class="hidden">
+                                <div id="news-carousel" class="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2" style="-webkit-overflow-scrolling:touch; scrollbar-width:none; -ms-overflow-style:none;"></div>
+                            </div>
+
+                            <!-- Error -->
+                            <div id="news-error" class="hidden text-[11px] text-rose-400"></div>
                         </div>
                     </div>
 
@@ -690,8 +765,8 @@
     </div>
 
     <!-- Modal: Catalog / Modify Wine Profile -->
-    <div id="add-wine-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4 hidden">
-        <div class="bg-dark-850 rounded-3xl border border-merlot-900/30 w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div id="add-wine-modal" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-md hidden">
+        <div class="bg-dark-850 rounded-t-3xl md:rounded-3xl border border-merlot-900/30 w-full md:max-w-3xl overflow-hidden shadow-2xl flex flex-col h-[92vh] md:max-h-[90vh]" style="padding-bottom: env(safe-area-inset-bottom)">
             <!-- Modal header bar -->
             <div class="px-6 py-4 bg-dark-900 border-b border-merlot-950/60 flex justify-between items-center flex-shrink-0">
                 <h3 id="modal-title" class="font-serif text-lg font-bold text-white tracking-wide">Catalog New Bottle</h3>
@@ -1131,6 +1206,10 @@
         let confirmCallback = null;
 
         window.onload = async function() {
+            // Pre-load Guardian key if not already set
+            if (!localStorage.getItem('guardian_api_key')) {
+                localStorage.setItem('guardian_api_key', 'b4e76d61-4de0-4506-bee7-4324b7c59a58');
+            }
             // Load settings from Supabase first (syncs API keys across devices)
             await loadSettingsFromSupabase();
 
@@ -1181,6 +1260,7 @@
             renderRackMatrix();
             initGovee();
             autoAssignAllUnassigned();
+            fetchWineNews();
 
             // Show GitHub push button if already configured
             if (localStorage.getItem('github_token')) {
@@ -1301,6 +1381,8 @@
                 console.warn('Supabase settings load failed:', e.message);
             }
         }
+
+        async function deleteFromSupabase(wineId) {
             if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return;
             try {
                 await fetch(`${SUPABASE_URL}/rest/v1/wines?wine_id=eq.${wineId}`, {
@@ -2543,6 +2625,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             const githubRepo = localStorage.getItem('github_repo') || '';
             const githubToken = localStorage.getItem('github_token') || '';
             const e = (id) => document.getElementById(id);
+            if (e('settings-guardian-key')) e('settings-guardian-key').value = localStorage.getItem('guardian_api_key') || '';
             if (e('settings-govee-key')) e('settings-govee-key').value = goveeKey;
             if (e('settings-google-key')) e('settings-google-key').value = googleKey;
             if (e('settings-google-cx')) e('settings-google-cx').value = googleCx;
@@ -2749,6 +2832,64 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             }
         }
 
+        function saveGuardianKey() {
+            const key = document.getElementById('settings-guardian-key').value.trim();
+            if (!key) { showSettingsMsg('guardian-status-msg', 'Please enter your API key.', 'error'); return; }
+            localStorage.setItem('guardian_api_key', key);
+            saveSettingToSupabase('guardian_api_key', key);
+            showSettingsMsg('guardian-status-msg', '✓ Key saved! News will load on dashboard.', 'success');
+            fetchWineNews();
+        }
+
+        async function fetchWineNews() {
+            const key = localStorage.getItem('guardian_api_key');
+            hide('news-loading');
+            hide('news-error');
+            hide('news-carousel-wrap');
+            hide('news-no-key');
+
+            if (!key) {
+                show('news-no-key');
+                return;
+            }
+
+            show('news-loading');
+
+            try {
+                const url = `https://content.guardianapis.com/search?section=food&tag=food/wine&show-fields=thumbnail,trailText,headline&page-size=10&order-by=newest&api-key=${key}`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`API error ${res.status}`);
+                const data = await res.json();
+                const articles = data.response?.results || [];
+
+                if (articles.length === 0) throw new Error('No articles found');
+
+                const carousel = document.getElementById('news-carousel');
+                carousel.innerHTML = articles.map(a => {
+                    const thumb = a.fields?.thumbnail || '';
+                    const trail = a.fields?.trailText || '';
+                    const date = new Date(a.webPublicationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    return `<a href="${a.webUrl}" target="_blank" rel="noopener noreferrer"
+                        class="flex-shrink-0 w-56 snap-start bg-dark-900 rounded-xl border border-gray-800 overflow-hidden hover:border-gold-500/30 transition-all group">
+                        ${thumb ? `<div class="h-28 overflow-hidden"><img src="${thumb}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt=""></div>` : '<div class="h-28 bg-merlot-950/40 flex items-center justify-center"><svg class="w-8 h-8 text-merlot-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg></div>'}
+                        <div class="p-3 space-y-1.5">
+                            <p class="text-[10px] text-gold-500 font-semibold">${date}</p>
+                            <p class="text-[11px] font-bold text-white leading-tight line-clamp-2">${a.webTitle}</p>
+                            <p class="text-[10px] text-gray-500 leading-relaxed line-clamp-2">${trail.replace(/<[^>]*>/g, '')}</p>
+                        </div>
+                    </a>`;
+                }).join('');
+
+                hide('news-loading');
+                show('news-carousel-wrap');
+
+            } catch (err) {
+                hide('news-loading');
+                const errEl = document.getElementById('news-error');
+                if (errEl) { errEl.textContent = `Could not load news: ${err.message}`; show('news-error'); }
+            }
+        }
+
         function saveGoogleKeys() {
             const key = document.getElementById('settings-google-key').value.trim();
             const cx  = document.getElementById('settings-google-cx').value.trim();
@@ -2835,6 +2976,19 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             show('govee-readings');
             show('govee-updated');
             document.getElementById('govee-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+
+            // Update nav mini display
+            const navWidget = document.getElementById('nav-cellar-conditions');
+            if (navWidget && (tempF !== null || humidity !== null)) {
+                navWidget.classList.remove('hidden');
+                navWidget.classList.add('flex');
+            }
+            if (tempF !== null && document.getElementById('nav-temp')) {
+                document.getElementById('nav-temp').textContent = `${tempF}°F`;
+            }
+            if (humidity !== null && document.getElementById('nav-humidity')) {
+                document.getElementById('nav-humidity').textContent = `${parseFloat(humidity).toFixed(1)}%`;
+            }
 
             // Temperature
             if (tempF !== null) {
