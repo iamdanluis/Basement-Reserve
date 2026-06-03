@@ -1154,11 +1154,11 @@
 
             // Configure dialog actions
             document.getElementById('btn-confirm-cancel').onclick = () => {
-                hide('custom-confirm-modal');
+                const _ccmh = document.getElementById('custom-confirm-modal'); if (_ccmh) { _ccmh.classList.add('hidden'); _ccmh.classList.remove('flex'); }
                 confirmCallback = null;
             };
             document.getElementById('btn-confirm-accept').onclick = () => {
-                hide('custom-confirm-modal');
+                const _ccmh = document.getElementById('custom-confirm-modal'); if (_ccmh) { _ccmh.classList.add('hidden'); _ccmh.classList.remove('flex'); }
                 if (confirmCallback) {
                     confirmCallback();
                     confirmCallback = null;
@@ -1184,7 +1184,7 @@
         function showCustomConfirm(message, action) {
             document.getElementById('confirm-modal-text').innerText = message;
             confirmCallback = action;
-            show('custom-confirm-modal');
+            const _ccm = document.getElementById('custom-confirm-modal'); if (_ccm) { _ccm.classList.remove('hidden'); _ccm.classList.add('flex'); }
         }
 
         // Save layout state helper
@@ -1483,7 +1483,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             researchedValueCache = null;
             
             clearWinePhoto();
-            show('add-wine-modal');
+            const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); _awm.classList.add('flex'); }
         }
 
         function openAddWineModalAtSlot(row, col) {
@@ -1562,7 +1562,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             }
 
             show('btn-delete-wine');
-            show('add-wine-modal');
+            const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); _awm.classList.add('flex'); }
         }
 
         async function fetchWinePhoto(winery, wineName, vintage, wineId) {
@@ -1595,7 +1595,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
         }
 
         function closeAddWineModal() {
-            hide('add-wine-modal');
+            const _awmh = document.getElementById('add-wine-modal'); if (_awmh) { _awmh.classList.add('hidden'); _awmh.classList.remove('flex'); }
         }
 
         function saveWine(event) {
@@ -2439,23 +2439,29 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
 
         // ── Settings Modal ────────────────────────────────────────────
         function openSettingsModal() {
-            document.getElementById('settings-govee-key').value = localStorage.getItem('govee_api_key') || '';
-            document.getElementById('settings-google-key').value = localStorage.getItem('google_api_key') || '';
-            document.getElementById('settings-google-cx').value = localStorage.getItem('google_cx') || '';
-            document.getElementById('settings-github-user').value = localStorage.getItem('github_user') || '';
-            document.getElementById('settings-github-repo').value = localStorage.getItem('github_repo') || '';
-            document.getElementById('settings-github-token').value = localStorage.getItem('github_token') || '';
-            const goveeMsg = document.getElementById('govee-status-msg');
-            const githubMsg = document.getElementById('github-status-msg');
-            const importMsg = document.getElementById('import-status');
-            if (goveeMsg) goveeMsg.classList.add('hidden');
-            if (githubMsg) githubMsg.classList.add('hidden');
-            if (importMsg) importMsg.classList.add('hidden');
-            show('settings-modal');
+            const goveeKey = localStorage.getItem('govee_api_key') || '';
+            const googleKey = localStorage.getItem('google_api_key') || '';
+            const googleCx = localStorage.getItem('google_cx') || '';
+            const githubUser = localStorage.getItem('github_user') || '';
+            const githubRepo = localStorage.getItem('github_repo') || '';
+            const githubToken = localStorage.getItem('github_token') || '';
+            const e = (id) => document.getElementById(id);
+            if (e('settings-govee-key')) e('settings-govee-key').value = goveeKey;
+            if (e('settings-google-key')) e('settings-google-key').value = googleKey;
+            if (e('settings-google-cx')) e('settings-google-cx').value = googleCx;
+            if (e('settings-github-user')) e('settings-github-user').value = githubUser;
+            if (e('settings-github-repo')) e('settings-github-repo').value = githubRepo;
+            if (e('settings-github-token')) e('settings-github-token').value = githubToken;
+            hide('govee-status-msg');
+            hide('github-status-msg');
+            hide('import-status');
+            const modal = document.getElementById('settings-modal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
         }
 
         function closeSettingsModal() {
-            hide('settings-modal');
+            const modal = document.getElementById('settings-modal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
         }
 
         function toggleGoveeKeyVisibility() {
@@ -2885,7 +2891,7 @@ Current year is 2026. Return ONLY valid JSON.`;
 
         // Safe element helpers — prevents null classList errors
         const hide = (id) => { const e = document.getElementById(id); if (e) e.classList.add('hidden'); };
-        const show = (id) => { const e = document.getElementById(id); if (e) e.classList.remove('hidden'); };
+        const show = (id) => { const e = document.getElementById(id); if (e) { e.classList.remove('hidden'); } };
 
         function resetScores() {
             hide('scores-loading'); hide('scores-result'); hide('scores-empty');
