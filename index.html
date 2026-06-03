@@ -1131,18 +1131,26 @@
         let cellarInventory = [];
         let confirmCallback = null;
 
-        window.onload = function() {
-            // Read storage files or seed initial Oregon defaults
-            const stored = localStorage.getItem("basement_reserve_collection_2026");
-            if (stored) {
-                try {
-                    cellarInventory = JSON.parse(stored);
-                } catch(e) {
-                    cellarInventory = [...defaultWineSeed];
-                }
+        window.onload = async function() {
+            // Try Supabase first, fallback to localStorage
+            const supabaseData = await loadFromSupabase();
+            if (supabaseData && supabaseData.length > 0) {
+                cellarInventory = supabaseData;
+                localStorage.setItem("basement_reserve_collection_2026", JSON.stringify(cellarInventory));
             } else {
-                cellarInventory = [...defaultWineSeed];
-                saveToLocalStorage();
+                const stored = localStorage.getItem("basement_reserve_collection_2026");
+                if (stored) {
+                    try {
+                        cellarInventory = JSON.parse(stored);
+                        // Push localStorage data up to Supabase if Supabase was empty
+                        saveToSupabase();
+                    } catch(e) {
+                        cellarInventory = [...defaultWineSeed];
+                    }
+                } else {
+                    cellarInventory = [...defaultWineSeed];
+                    saveToLocalStorage();
+                }
             }
 
             // Bind current calendar date
@@ -1218,8 +1226,67 @@
             }
         }
 
+        // ── Supabase Config ───────────────────────────────────────────
+        const SUPABASE_URL = 'https://inrsabyqvzvisnjcpxpq.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucnNhYnlxdnp2aXNuamNweHBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NDUzNTAsImV4cCI6MjA5NjAyMTM1MH0.38xhiiK6BWjXjKo8taHUye0sM3PIRjYBQ2Sntz3xvkQ';
+
+        const sbHeaders = () => ({
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Prefer': 'resolution=merge-duplicates'
+        });
+
+        async function saveToSupabase() {
+            if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return;
+            try {
+                const rows = cellarInventory.map(w => ({
+                    wine_id: w.id,
+                    data: w,
+                    updated_at: new Date().toISOString()
+                }));
+                await fetch(`${SUPABASE_URL}/rest/v1/wines`, {
+                    method: 'POST',
+                    headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates' },
+                    body: JSON.stringify(rows)
+                });
+            } catch (e) {
+                console.warn('Supabase save failed, using localStorage:', e.message);
+            }
+        }
+
+        async function loadFromSupabase() {
+            if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return null;
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/wines?select=data,updated_at&order=updated_at.asc`, {
+                    headers: sbHeaders()
+                });
+                if (!res.ok) return null;
+                const rows = await res.json();
+                if (!rows || rows.length === 0) return null;
+                return rows.map(r => r.data);
+            } catch (e) {
+                console.warn('Supabase load failed, using localStorage:', e.message);
+                return null;
+            }
+        }
+
+        async function deleteFromSupabase(wineId) {
+            if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return;
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/wines?wine_id=eq.${wineId}`, {
+                    method: 'DELETE',
+                    headers: sbHeaders()
+                });
+            } catch (e) {
+                console.warn('Supabase delete failed:', e.message);
+            }
+        }
+        // ─────────────────────────────────────────────────────────────
+
         function saveToLocalStorage() {
             localStorage.setItem("basement_reserve_collection_2026", JSON.stringify(cellarInventory));
+            saveToSupabase(); // sync to cloud in background
         }
 
         // Claude API helper
@@ -1680,6 +1747,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             showCustomConfirm("Permanently delete this bottle from your private catalog?", () => {
                 cellarInventory = cellarInventory.filter(w => w.id !== id);
                 saveToLocalStorage();
+                deleteFromSupabase(id);
                 closeAddWineModal();
 
                 renderDashboard();
@@ -2488,14 +2556,40 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 version: 1,
                 cellar: cellarInventory
             };
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `basement-reserve-${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showToast('Cellar exported successfully!', 'success');
+            const json = JSON.stringify(data, null, 2);
+
+            // Try file download first
+            try {
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `basement-reserve-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('Cellar exported!', 'success');
+            } catch (e) {
+                // Fallback: copy to clipboard
+                navigator.clipboard.writeText(json).then(() => {
+                    showToast('Copied to clipboard! Paste into a .json file.', 'success');
+                    const status = document.getElementById('import-status');
+                    if (status) {
+                        status.className = 'text-[11px] rounded-lg px-3 py-2 bg-blue-950/60 text-blue-300 border border-blue-700/30';
+                        status.textContent = 'Cellar data copied to clipboard. Open a text editor, paste, and save as basement-reserve.json';
+                        status.classList.remove('hidden');
+                    }
+                }).catch(() => {
+                    // Last resort: show in textarea
+                    const status = document.getElementById('import-status');
+                    if (status) {
+                        status.className = 'text-[11px] rounded-lg px-3 py-2 bg-blue-950/60 text-blue-300 border border-blue-700/30';
+                        status.innerHTML = 'Copy this data and save as a .json file:<br><textarea class="w-full mt-2 bg-dark-900 text-white text-[10px] p-2 rounded h-24 font-mono" onclick="this.select()">' + json.replace(/</g, '&lt;') + '</textarea>';
+                        status.classList.remove('hidden');
+                    }
+                });
+            }
         }
 
         function importCellarData(event) {
