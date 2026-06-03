@@ -2955,15 +2955,18 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
 
                 const caps = data.payload?.capabilities || [];
                 let tempC = null, humidity = null;
+                let tempRaw = null, humidityRaw = null;
 
                 caps.forEach(c => {
-                    if (c.instance === "sensorTemperature") tempC = c.state?.value / 100;
-                    if (c.instance === "sensorHumidity") humidity = c.state?.value / 100;
+                    if (c.instance === "sensorTemperature") tempRaw = c.state?.value;
+                    if (c.instance === "sensorHumidity") humidityRaw = c.state?.value;
                 });
 
-                if (tempC === null && humidity === null) throw new Error("No sensor data returned.");
+                if (tempRaw === null && humidityRaw === null) throw new Error("No sensor data returned.");
 
-                const tempF = tempC !== null ? (tempC * 9/5 + 32).toFixed(1) : null;
+                // Govee H5179 returns values x100 in Fahrenheit
+                const tempF = tempRaw !== null ? (tempRaw / 100).toFixed(1) : null;
+                const humidity = humidityRaw !== null ? (humidityRaw / 100).toFixed(1) : null;
                 renderGoveeReadings(tempF, humidity);
 
             } catch (e) {
