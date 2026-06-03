@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Basement Reserve - Cellar Catalog</title>
 
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -265,7 +264,7 @@
         <div class="flex flex-col h-full w-full overflow-hidden">
         
         <!-- Top Navigation Bar (desktop + mobile) -->
-        <header class="bg-dark-900 border-b border-merlot-950 flex-shrink-0">
+        <header class="bg-dark-900 border-b border-merlot-950 flex-shrink-0" style="padding-top: env(safe-area-inset-top)">
             <div class="flex items-center justify-between px-4 md:px-8 h-14 gap-4">
                 <!-- Brand -->
                 <div class="flex items-center gap-2.5 flex-shrink-0">
@@ -338,7 +337,7 @@
         </header>
 
             <!-- Main Content Area Container -->
-            <main class="flex-grow overflow-y-auto p-6 md:p-8 space-y-8 bg-gradient-to-b from-dark-900 to-dark-950">
+            <main class="flex-grow overflow-y-auto p-6 md:p-8 space-y-8 bg-gradient-to-b from-dark-900 to-dark-950" style="padding-bottom: calc(2rem + env(safe-area-inset-bottom))">
 
                 <!-- Tab: Dashboard Section -->
                 <section id="tab-dashboard" class="space-y-8">
