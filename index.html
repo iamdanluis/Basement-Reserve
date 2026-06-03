@@ -1131,6 +1131,9 @@
         let confirmCallback = null;
 
         window.onload = async function() {
+            // Load settings from Supabase first (syncs API keys across devices)
+            await loadSettingsFromSupabase();
+
             // Try Supabase first, fallback to localStorage
             const supabaseData = await loadFromSupabase();
             if (supabaseData && supabaseData.length > 0) {
@@ -1270,7 +1273,34 @@
             }
         }
 
-        async function deleteFromSupabase(wineId) {
+        async function saveSettingToSupabase(key, value) {
+            if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return;
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/settings`, {
+                    method: 'POST',
+                    headers: { ...sbHeaders(), 'Prefer': 'resolution=merge-duplicates' },
+                    body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
+                });
+            } catch (e) {
+                console.warn('Supabase settings save failed:', e.message);
+            }
+        }
+
+        async function loadSettingsFromSupabase() {
+            if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return;
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?select=key,value`, {
+                    headers: sbHeaders()
+                });
+                if (!res.ok) return;
+                const rows = await res.json();
+                rows.forEach(row => {
+                    localStorage.setItem(row.key, row.value);
+                });
+            } catch (e) {
+                console.warn('Supabase settings load failed:', e.message);
+            }
+        }
             if (!SUPABASE_KEY || SUPABASE_KEY.includes('placeholder')) return;
             try {
                 await fetch(`${SUPABASE_URL}/rest/v1/wines?wine_id=eq.${wineId}`, {
@@ -2540,6 +2570,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             const key = document.getElementById('settings-govee-key').value.trim();
             if (!key) { showSettingsMsg('govee-status-msg', 'Please enter your API key.', 'error'); return; }
             localStorage.setItem('govee_api_key', key);
+            await saveSettingToSupabase('govee_api_key', key);
             showSettingsMsg('govee-status-msg', 'Connecting to Govee...', 'info');
             goveeDeviceId = null;
             await initGovee();
@@ -2644,9 +2675,10 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             localStorage.setItem('github_user', user);
             localStorage.setItem('github_repo', repo);
             localStorage.setItem('github_token', token);
-            showSettingsMsg('github-status-msg', '✓ GitHub settings saved! The Push button will appear in the nav.', 'success');
-            show('btn-github-push');
-            const _gbtn = document.getElementById('btn-github-push'); if (_gbtn) { _gbtn.classList.remove('hidden'); _gbtn.classList.add('flex'); }
+            saveSettingToSupabase('github_user', user);
+            saveSettingToSupabase('github_repo', repo);
+            saveSettingToSupabase('github_token', token);
+            showSettingsMsg('github-status-msg', '✓ GitHub settings saved!', 'success');
         }
 
         function toggleTokenVisibility() {
@@ -2720,8 +2752,8 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
         function saveGoogleKeys() {
             const key = document.getElementById('settings-google-key').value.trim();
             const cx  = document.getElementById('settings-google-cx').value.trim();
-            if (key) localStorage.setItem('google_api_key', key);
-            if (cx)  localStorage.setItem('google_cx', cx);
+            if (key) { localStorage.setItem('google_api_key', key); saveSettingToSupabase('google_api_key', key); }
+            if (cx)  { localStorage.setItem('google_cx', cx); saveSettingToSupabase('google_cx', cx); }
             showToast('Google settings saved!', 'success');
             closeSettingsModal();
         }
