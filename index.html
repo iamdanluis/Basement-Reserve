@@ -2959,8 +2959,6 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 if (!res.ok || data.code !== 200) throw new Error(data.message || "API error");
 
                 const caps = data.payload?.capabilities || [];
-                console.log('Govee raw capabilities:', JSON.stringify(caps));
-
                 let tempRaw = null, humidityRaw = null;
 
                 caps.forEach(c => {
@@ -2970,8 +2968,9 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
 
                 if (tempRaw === null && humidityRaw === null) throw new Error("No sensor data returned.");
 
-                const tempF = tempRaw !== null ? (tempRaw / 100).toFixed(1) : null;
-                const humidityVal = humidityRaw !== null ? (humidityRaw / 100).toFixed(1) : null;
+                // Values are already in Fahrenheit and % — no conversion needed
+                const tempF = tempRaw !== null ? parseFloat(tempRaw).toFixed(1) : null;
+                const humidityVal = humidityRaw !== null ? parseFloat(humidityRaw).toFixed(1) : null;
                 renderGoveeReadings(tempF, humidityVal);
 
             } catch (e) {
