@@ -2959,7 +2959,6 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 if (!res.ok || data.code !== 200) throw new Error(data.message || "API error");
 
                 const caps = data.payload?.capabilities || [];
-                let tempC = null, humidity = null;
                 let tempRaw = null, humidityRaw = null;
 
                 caps.forEach(c => {
@@ -2969,10 +2968,9 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
 
                 if (tempRaw === null && humidityRaw === null) throw new Error("No sensor data returned.");
 
-                // Govee H5179 returns values x100 in Fahrenheit
                 const tempF = tempRaw !== null ? (tempRaw / 100).toFixed(1) : null;
-                const humidity = humidityRaw !== null ? (humidityRaw / 100).toFixed(1) : null;
-                renderGoveeReadings(tempF, humidity);
+                const humidityVal = humidityRaw !== null ? (humidityRaw / 100).toFixed(1) : null;
+                renderGoveeReadings(tempF, humidityVal);
 
             } catch (e) {
                 showGoveeError(e.message);
