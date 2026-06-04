@@ -2959,6 +2959,8 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 if (!res.ok || data.code !== 200) throw new Error(data.message || "API error");
 
                 const caps = data.payload?.capabilities || [];
+                console.log('Govee raw capabilities:', JSON.stringify(caps));
+
                 let tempRaw = null, humidityRaw = null;
 
                 caps.forEach(c => {
