@@ -1217,17 +1217,18 @@
             // Load settings from Supabase first (syncs API keys across devices)
             await loadSettingsFromSupabase();
 
-            // Try Supabase first, fallback to localStorage
+            // Try Supabase first, always prefer cloud data
             const supabaseData = await loadFromSupabase();
             if (supabaseData && supabaseData.length > 0) {
                 cellarInventory = supabaseData;
+                // Always update localStorage with latest from Supabase
                 localStorage.setItem("basement_reserve_collection_2026", JSON.stringify(cellarInventory));
             } else {
+                // Supabase empty or failed — use localStorage
                 const stored = localStorage.getItem("basement_reserve_collection_2026");
                 if (stored) {
                     try {
                         cellarInventory = JSON.parse(stored);
-                        // Push localStorage data up to Supabase if Supabase was empty
                         saveToSupabase();
                     } catch(e) {
                         cellarInventory = [...defaultWineSeed];
