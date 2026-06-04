@@ -2992,8 +2992,8 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             if (tempF !== null && document.getElementById('nav-temp')) {
                 document.getElementById('nav-temp').textContent = `${tempF}°F`;
             }
-            if (humidityVal !== null && document.getElementById('nav-humidityVal')) {
-                document.getElementById('nav-humidityVal').textContent = `${parseFloat(humidityVal).toFixed(1)}%`;
+            if (humidityVal !== null && document.getElementById('nav-humidity')) {
+                document.getElementById('nav-humidity').textContent = `${humidityVal}%`;
             }
 
             // Temperature
@@ -3013,14 +3013,14 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
 
             // Humidity
             if (humidityVal !== null) {
-                document.getElementById('govee-humidityVal').textContent = `${humidityVal.toFixed(1)}%`;
+                document.getElementById('govee-humidity').textContent = `${humidityVal}%`;
                 let hColor, hLabel;
-                if (humidityVal >= 60 && humidityVal <= 70) { hColor = 'bg-green-500'; hLabel = '✓ Ideal'; document.getElementById('govee-humidityVal-status').className = 'text-[10px] font-semibold text-green-400'; }
-                else if (humidityVal >= 50 && humidityVal <= 80) { hColor = 'bg-amber-500'; hLabel = humidityVal < 60 ? 'Slightly dry' : 'Slightly humid'; document.getElementById('govee-humidityVal-status').className = 'text-[10px] font-semibold text-amber-400'; }
-                else { hColor = 'bg-rose-500'; hLabel = humidityVal < 50 ? '⚠ Too dry' : '⚠ Too humid'; document.getElementById('govee-humidityVal-status').className = 'text-[10px] font-semibold text-rose-400'; }
-                document.getElementById('govee-humidityVal-status').textContent = hLabel;
-                document.getElementById('govee-humidityVal-bar').className = `h-full rounded-full transition-all duration-700 ${hColor}`;
-                document.getElementById('govee-humidityVal-bar').style.width = `${Math.min(100, humidityVal)}%`;
+                if (parseFloat(humidityVal) >= 60 && parseFloat(humidityVal) <= 70) { hColor = 'bg-green-500'; hLabel = '✓ Ideal'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-green-400'; }
+                else if (parseFloat(humidityVal) >= 50 && parseFloat(humidityVal) <= 80) { hColor = 'bg-amber-500'; hLabel = parseFloat(humidityVal) < 60 ? 'Slightly dry' : 'Slightly humid'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-amber-400'; }
+                else { hColor = 'bg-rose-500'; hLabel = parseFloat(humidityVal) < 50 ? '⚠ Too dry' : '⚠ Too humid'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-rose-400'; }
+                document.getElementById('govee-humidity-status').textContent = hLabel;
+                document.getElementById('govee-humidity-bar').className = `h-full rounded-full transition-all duration-700 ${hColor}`;
+                document.getElementById('govee-humidity-bar').style.width = `${Math.min(100, parseFloat(humidityVal))}%`;
             }
         }
 
