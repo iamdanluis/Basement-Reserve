@@ -98,7 +98,11 @@
     </script>
     <style>
         /* Custom scrollbar styling for high-end boutique feel */
-        ::-webkit-scrollbar {
+        @media (min-width: 768px) {
+            #add-wine-modal > div {
+                height: auto !important;
+            }
+        }
             width: 6px;
             height: 6px;
         }
@@ -183,6 +187,32 @@
                     <button onclick="saveGoveeKey()" class="w-full py-2.5 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold border border-gold-500/20 transition-all active:scale-95">
                         Save & Connect
                     </button>
+
+                    <!-- Cellar thresholds -->
+                    <div class="pt-3 border-t border-gray-800/60 space-y-3">
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Alert Thresholds</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] text-gray-600 mb-1 block">Ideal Temp (°F)</label>
+                                <input type="number" id="setting-ideal-temp" value="55" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-600 mb-1 block">Warn Above (°F)</label>
+                                <input type="number" id="setting-warn-high" value="70" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-600 mb-1 block">Humidity Min (%)</label>
+                                <input type="number" id="setting-humid-low" value="60" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                            </div>
+                            <div>
+                                <label class="text-[10px] text-gray-600 mb-1 block">Humidity Max (%)</label>
+                                <input type="number" id="setting-humid-high" value="70" class="w-full bg-dark-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                            </div>
+                        </div>
+                        <button onclick="saveCellarThresholds()" class="w-full py-2 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                            Save Thresholds
+                        </button>
+                    </div>
                 </div>
                 <!-- Export / Import -->
                 <div class="border-t border-gray-800 pt-5 space-y-3">
@@ -765,8 +795,8 @@
     </div>
 
     <!-- Modal: Catalog / Modify Wine Profile -->
-    <div id="add-wine-modal" class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-md hidden">
-        <div class="bg-dark-850 rounded-t-3xl md:rounded-3xl border border-merlot-900/30 w-full md:max-w-3xl shadow-2xl flex flex-col" style="height: 95dvh; max-height: 95dvh; padding-bottom: env(safe-area-inset-bottom)">
+    <div id="add-wine-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex-col md:flex-row md:items-center md:justify-center">
+        <div class="bg-dark-850 border-merlot-900/30 w-full h-full md:rounded-3xl md:border md:max-w-3xl md:shadow-2xl md:h-auto md:max-h-[90vh] flex flex-col" style="padding-bottom: env(safe-area-inset-bottom); padding-top: env(safe-area-inset-top)">
             <!-- Drag handle for mobile -->
             <div class="flex justify-center pt-3 pb-1 md:hidden flex-shrink-0">
                 <div class="w-10 h-1 rounded-full bg-gray-700"></div>
@@ -1666,7 +1696,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             researchedValueCache = null;
             
             clearWinePhoto();
-            const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); _awm.classList.add('flex'); }
+            const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); }
         }
 
         function openAddWineModalAtSlot(row, col) {
@@ -1745,14 +1775,58 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             }
 
             show('btn-delete-wine');
-            const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); _awm.classList.add('flex'); }
+            const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); }
         }
 
         async function fetchWinePhoto(winery, wineName, vintage, wineId) {
+            const GOOGLE_API_KEY = localStorage.getItem('google_api_key') || 'AIzaSyDHbgFWSWJQYYwrWdm66dIRTG0qQMvw0Gs';
+            const SEARCH_ENGINE_ID = localStorage.getItem('google_cx') || '36fa0880c0d7349cc';
+
             const loader = document.getElementById('photo-fetch-loader');
             const imgEl = document.getElementById('label-image-preview');
-            // Google Custom Search blocked in this environment — show fallback card
-            showFallbackPhoto(winery, wineName, vintage, loader, imgEl);
+
+            try {
+                const query = encodeURIComponent(`${winery} ${wineName} ${vintage} wine bottle`);
+                const url = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${SEARCH_ENGINE_ID}&searchType=image&q=${query}&num=5&imgType=photo&fields=items(link)`;
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error?.message || `API error ${response.status}`);
+
+                const items = data.items || [];
+                if (items.length === 0) throw new Error("No images found");
+
+                const tryImage = (index) => {
+                    if (index >= items.length) {
+                        showFallbackPhoto(winery, wineName, vintage, loader, imgEl);
+                        return;
+                    }
+                    const imageUrl = items[index].link;
+                    const testImg = new Image();
+                    testImg.onload = () => {
+                        if (loader) loader.remove();
+                        imgEl.src = imageUrl;
+                        imgEl.style.opacity = '1';
+                        imgEl.style.display = '';
+                        document.getElementById('btn-remove-photo').classList.remove('hidden');
+                        const wine = cellarInventory.find(w => w.id === wineId);
+                        if (wine) { wine.image = imageUrl; saveToLocalStorage(); }
+                        showToast("Wine photo found!", "success");
+                    };
+                    testImg.onerror = () => tryImage(index + 1);
+                    testImg.src = imageUrl;
+                };
+
+                tryImage(0);
+
+            } catch (err) {
+                console.error("Photo fetch error:", err);
+                showFallbackPhoto(winery, wineName, vintage, loader, imgEl);
+            }
         }
 
         function showFallbackPhoto(winery, wineName, vintage, loader, imgEl) {
@@ -1778,7 +1852,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
         }
 
         function closeAddWineModal() {
-            const _awmh = document.getElementById('add-wine-modal'); if (_awmh) { _awmh.classList.add('hidden'); _awmh.classList.remove('flex'); }
+            const _awmh = document.getElementById('add-wine-modal'); if (_awmh) { _awmh.classList.add('hidden'); }
         }
 
         function saveWine(event) {
@@ -2631,6 +2705,10 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             const githubToken = localStorage.getItem('github_token') || '';
             const e = (id) => document.getElementById(id);
             if (e('settings-guardian-key')) e('settings-guardian-key').value = localStorage.getItem('guardian_api_key') || '';
+            if (e('setting-ideal-temp')) e('setting-ideal-temp').value = localStorage.getItem('cellar_ideal_temp') || '55';
+            if (e('setting-warn-high')) e('setting-warn-high').value = localStorage.getItem('cellar_warn_temp_high') || '70';
+            if (e('setting-humid-low')) e('setting-humid-low').value = localStorage.getItem('cellar_humid_low') || '60';
+            if (e('setting-humid-high')) e('setting-humid-high').value = localStorage.getItem('cellar_humid_high') || '70';
             if (e('settings-govee-key')) e('settings-govee-key').value = goveeKey;
             if (e('settings-google-key')) e('settings-google-key').value = googleKey;
             if (e('settings-google-cx')) e('settings-google-cx').value = googleCx;
@@ -2652,6 +2730,19 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
         function toggleGoveeKeyVisibility() {
             const input = document.getElementById('settings-govee-key');
             input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function saveCellarThresholds() {
+            const idealTemp = document.getElementById('setting-ideal-temp').value;
+            const warnHigh = document.getElementById('setting-warn-high').value;
+            const humidLow = document.getElementById('setting-humid-low').value;
+            const humidHigh = document.getElementById('setting-humid-high').value;
+            localStorage.setItem('cellar_ideal_temp', idealTemp);
+            localStorage.setItem('cellar_warn_temp_high', warnHigh);
+            localStorage.setItem('cellar_humid_low', humidLow);
+            localStorage.setItem('cellar_humid_high', humidHigh);
+            showToast('Cellar thresholds saved!', 'success');
+            fetchGoveeReadings();
         }
 
         async function saveGoveeKey() {
@@ -2997,31 +3088,49 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                 document.getElementById('nav-humidity').textContent = `${humidityVal}%`;
             }
 
-            // Temperature
+            // Temperature — use configurable thresholds
             if (tempF !== null) {
                 document.getElementById('govee-temp').textContent = `${tempF}°F`;
                 const t = parseFloat(tempF);
-                const ideal = 55;
-                const diff = Math.abs(t - ideal);
+                const idealTemp = parseFloat(localStorage.getItem('cellar_ideal_temp') || '55');
+                const warnTempLow = parseFloat(localStorage.getItem('cellar_warn_temp_low') || '50');
+                const warnTempHigh = parseFloat(localStorage.getItem('cellar_warn_temp_high') || '70');
                 let tColor, tLabel;
-                if (diff <= 2) { tColor = 'bg-green-500'; tLabel = '✓ Ideal'; document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-green-400'; }
-                else if (diff <= 5) { tColor = 'bg-amber-500'; tLabel = t > ideal ? 'Slightly warm' : 'Slightly cool'; document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-amber-400'; }
-                else { tColor = 'bg-rose-500'; tLabel = t > ideal ? '⚠ Too warm' : '⚠ Too cold'; document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-rose-400'; }
+                if (t >= idealTemp - 3 && t <= idealTemp + 3) {
+                    tColor = 'bg-green-500'; tLabel = '✓ Ideal';
+                    document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-green-400';
+                } else if (t >= warnTempLow && t <= warnTempHigh) {
+                    tColor = 'bg-amber-500'; tLabel = t > idealTemp ? 'Slightly warm' : 'Slightly cool';
+                    document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-amber-400';
+                } else {
+                    tColor = 'bg-rose-500'; tLabel = t > warnTempHigh ? '⚠ Too warm' : '⚠ Too cold';
+                    document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-rose-400';
+                }
                 document.getElementById('govee-temp-status').textContent = tLabel;
                 document.getElementById('govee-temp-bar').className = `h-full rounded-full transition-all duration-700 ${tColor}`;
-                document.getElementById('govee-temp-bar').style.width = `${Math.min(100, (t / 80) * 100)}%`;
+                document.getElementById('govee-temp-bar').style.width = `${Math.min(100, (t / 100) * 100)}%`;
             }
 
-            // Humidity
+            // Humidity — use configurable thresholds
             if (humidityVal !== null) {
                 document.getElementById('govee-humidity').textContent = `${humidityVal}%`;
+                const h = parseFloat(humidityVal);
+                const humidIdealLow = parseFloat(localStorage.getItem('cellar_humid_low') || '60');
+                const humidIdealHigh = parseFloat(localStorage.getItem('cellar_humid_high') || '70');
                 let hColor, hLabel;
-                if (parseFloat(humidityVal) >= 60 && parseFloat(humidityVal) <= 70) { hColor = 'bg-green-500'; hLabel = '✓ Ideal'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-green-400'; }
-                else if (parseFloat(humidityVal) >= 50 && parseFloat(humidityVal) <= 80) { hColor = 'bg-amber-500'; hLabel = parseFloat(humidityVal) < 60 ? 'Slightly dry' : 'Slightly humid'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-amber-400'; }
-                else { hColor = 'bg-rose-500'; hLabel = parseFloat(humidityVal) < 50 ? '⚠ Too dry' : '⚠ Too humid'; document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-rose-400'; }
+                if (h >= humidIdealLow && h <= humidIdealHigh) {
+                    hColor = 'bg-green-500'; hLabel = '✓ Ideal';
+                    document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-green-400';
+                } else if (h >= humidIdealLow - 10 && h <= humidIdealHigh + 10) {
+                    hColor = 'bg-amber-500'; hLabel = h < humidIdealLow ? 'Slightly dry' : 'Slightly humid';
+                    document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-amber-400';
+                } else {
+                    hColor = 'bg-rose-500'; hLabel = h < humidIdealLow - 10 ? '⚠ Too dry' : '⚠ Too humid';
+                    document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-rose-400';
+                }
                 document.getElementById('govee-humidity-status').textContent = hLabel;
                 document.getElementById('govee-humidity-bar').className = `h-full rounded-full transition-all duration-700 ${hColor}`;
-                document.getElementById('govee-humidity-bar').style.width = `${Math.min(100, parseFloat(humidityVal))}%`;
+                document.getElementById('govee-humidity-bar').style.width = `${Math.min(100, h)}%`;
             }
         }
 
