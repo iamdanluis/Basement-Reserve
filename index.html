@@ -167,8 +167,27 @@
                 </button>
             </div>
             <div class="p-6 space-y-6 overflow-y-auto max-h-[80vh]">
-                <!-- Govee -->
+                <!-- Supabase -->
                 <div class="space-y-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Supabase Database</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Required for cross-device sync. Anon public key from your Supabase project.</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Supabase Anon Key</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="settings-supabase-key" placeholder="Paste your Supabase anon key"
+                                class="flex-1 bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                            <button onclick="saveSupabaseKey()" class="px-3 py-2 bg-gradient-to-r from-merlot-800 to-merlot-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <div id="supabase-status-msg" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
+                </div>
+
+                <!-- Govee -->
+                <div class="space-y-3 border-t border-gray-800 pt-5">
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Govee Sensor</h3>
                         <p class="text-[11px] text-gray-500 mt-1">Connect your H5179 to display live cellar temperature & humidity on the dashboard.</p>
@@ -1241,9 +1260,7 @@
 
         window.onload = async function() {
             // Pre-load Guardian key if not already set
-            if (!localStorage.getItem('guardian_api_key')) {
-                localStorage.setItem('guardian_api_key', 'b4e76d61-4de0-4506-bee7-4324b7c59a58');
-            }
+            // Guardian key stored in localStorage via Settings
             // Load settings from Supabase first (syncs API keys across devices)
             await loadSettingsFromSupabase();
 
@@ -1345,7 +1362,7 @@
 
         // ── Supabase Config ───────────────────────────────────────────
         const SUPABASE_URL = 'https://inrsabyqvzvisnjcpxpq.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlucnNhYnlxdnp2aXNuamNweHBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NDUzNTAsImV4cCI6MjA5NjAyMTM1MH0.38xhiiK6BWjXjKo8taHUye0sM3PIRjYBQ2Sntz3xvkQ';
+        const SUPABASE_KEY = localStorage.getItem('supabase_key') || '';
 
         const sbHeaders = () => ({
             'Content-Type': 'application/json',
@@ -1779,11 +1796,16 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
         }
 
         async function fetchWinePhoto(winery, wineName, vintage, wineId) {
-            const GOOGLE_API_KEY = localStorage.getItem('google_api_key') || 'AIzaSyDHbgFWSWJQYYwrWdm66dIRTG0qQMvw0Gs';
-            const SEARCH_ENGINE_ID = localStorage.getItem('google_cx') || '36fa0880c0d7349cc';
+            const GOOGLE_API_KEY = localStorage.getItem('google_api_key');
+            const SEARCH_ENGINE_ID = localStorage.getItem('google_cx');
 
             const loader = document.getElementById('photo-fetch-loader');
             const imgEl = document.getElementById('label-image-preview');
+
+            if (!GOOGLE_API_KEY || !SEARCH_ENGINE_ID) {
+                showFallbackPhoto(winery, wineName, vintage, loader, imgEl);
+                return;
+            }
 
             try {
                 const query = encodeURIComponent(`${winery} ${wineName} ${vintage} wine bottle`);
@@ -2704,6 +2726,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             const githubRepo = localStorage.getItem('github_repo') || '';
             const githubToken = localStorage.getItem('github_token') || '';
             const e = (id) => document.getElementById(id);
+            if (e('settings-supabase-key')) e('settings-supabase-key').value = localStorage.getItem('supabase_key') || '';
             if (e('settings-guardian-key')) e('settings-guardian-key').value = localStorage.getItem('guardian_api_key') || '';
             if (e('setting-ideal-temp')) e('setting-ideal-temp').value = localStorage.getItem('cellar_ideal_temp') || '55';
             if (e('setting-warn-high')) e('setting-warn-high').value = localStorage.getItem('cellar_warn_temp_high') || '70';
@@ -2730,6 +2753,13 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
         function toggleGoveeKeyVisibility() {
             const input = document.getElementById('settings-govee-key');
             input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function saveSupabaseKey() {
+            const key = document.getElementById('settings-supabase-key').value.trim();
+            if (!key) { showSettingsMsg('supabase-status-msg', 'Please enter your key.', 'error'); return; }
+            localStorage.setItem('supabase_key', key);
+            showSettingsMsg('supabase-status-msg', '✓ Supabase key saved! Reload to sync.', 'success');
         }
 
         function saveCellarThresholds() {
