@@ -738,7 +738,7 @@
 
                     <!-- Visual Grid Matrix Container -->
                     <div class="bg-dark-800 p-6 md:p-8 rounded-3xl border border-merlot-950/20 shadow-xl overflow-x-auto">
-                        <div id="rack-matrix" class="min-w-[800px] space-y-3">
+                        <div id="rack-matrix" class="min-w-[800px] space-y-3" style="touch-action: none">
                             <!-- Dynamic Matrix Grid built in Javascript -->
                         </div>
                     </div>
@@ -2438,6 +2438,9 @@ ${inventoryContext}`;
                                     data-wine-id="${wine.id}"
                                     ondragstart="handleDragStart(event, '${wine.id}')"
                                     ondragend="handleDragEnd(event)"
+                                    ontouchstart="handleTouchStart(event, '${wine.id}')"
+                                    ontouchmove="handleTouchMove(event)"
+                                    ontouchend="handleTouchEnd(event)"
                                     onclick="openEditWineModal('${wine.id}')"
                                     class="w-full h-full rounded-xl border flex flex-col items-center justify-center px-1 overflow-hidden transition-all duration-200 shadow-md cursor-grab active:cursor-grabbing ${style} hover:ring-2 hover:ring-gold-400/40 select-none">
                                     <span class="text-[9px] font-serif font-bold truncate w-full text-center leading-tight text-white pointer-events-none">${wine.wineName}</span>
@@ -2717,7 +2720,95 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             box.classList.remove('hidden');
         }
 
-        // ── Settings Modal ────────────────────────────────────────────
+        // --- Touch Drag and Drop for mobile ---
+        let touchDragWineId = null;
+        let touchClone = null;
+        let lastTouchSlot = null;
+
+        function handleTouchStart(event, wineId) {
+            touchDragWineId = wineId;
+            const el = event.currentTarget;
+            el.style.opacity = '0.5';
+
+            // Create a floating clone for visual feedback
+            const rect = el.getBoundingClientRect();
+            touchClone = el.cloneNode(true);
+            touchClone.style.cssText = `
+                position: fixed; z-index: 9999; pointer-events: none;
+                width: ${rect.width}px; height: ${rect.height}px;
+                left: ${rect.left}px; top: ${rect.top}px;
+                opacity: 0.9; transform: scale(1.05);
+                transition: none; border-radius: 12px;
+            `;
+            document.body.appendChild(touchClone);
+        }
+
+        function handleTouchMove(event) {
+            event.preventDefault();
+            if (!touchClone) return;
+
+            const touch = event.touches[0];
+            const halfW = touchClone.offsetWidth / 2;
+            const halfH = touchClone.offsetHeight / 2;
+            touchClone.style.left = `${touch.clientX - halfW}px`;
+            touchClone.style.top = `${touch.clientY - halfH}px`;
+
+            // Find which slot we're hovering over
+            touchClone.style.display = 'none';
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            touchClone.style.display = '';
+
+            const slot = el?.closest('.rack-slot');
+
+            // Clear previous highlight
+            if (lastTouchSlot && lastTouchSlot !== slot) {
+                lastTouchSlot.classList.remove('ring-2', 'ring-gold-400', 'bg-gold-500/10', 'ring-rose-400', 'bg-rose-500/10');
+            }
+
+            if (slot) {
+                lastTouchSlot = slot;
+                const row = slot.dataset.row;
+                const col = slot.dataset.col;
+                const occupant = cellarInventory.find(w => w.rackRow === row && w.rackCol === col);
+                slot.classList.add('ring-2');
+                if (occupant && occupant.id !== touchDragWineId) {
+                    slot.classList.add('ring-rose-400', 'bg-rose-500/10');
+                } else if (!occupant) {
+                    slot.classList.add('ring-gold-400', 'bg-gold-500/10');
+                }
+            }
+        }
+
+        function handleTouchEnd(event) {
+            if (!touchDragWineId) return;
+
+            // Clean up clone
+            if (touchClone) { touchClone.remove(); touchClone = null; }
+
+            // Restore original opacity
+            const original = document.querySelector(`[data-wine-id="${touchDragWineId}"]`);
+            if (original) original.style.opacity = '1';
+
+            // Clear highlights
+            document.querySelectorAll('.rack-slot').forEach(s => {
+                s.classList.remove('ring-2', 'ring-gold-400', 'bg-gold-500/10', 'ring-rose-400', 'bg-rose-500/10');
+            });
+
+            // Find drop target
+            const touch = event.changedTouches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            const slot = el?.closest('.rack-slot');
+
+            if (slot) {
+                const targetRow = slot.dataset.row;
+                const targetCol = slot.dataset.col;
+                draggedWineId = touchDragWineId;
+                handleDrop({ preventDefault: () => {}, currentTarget: slot }, targetRow, targetCol);
+            }
+
+            touchDragWineId = null;
+            lastTouchSlot = null;
+        }
         function openSettingsModal() {
             const goveeKey = localStorage.getItem('govee_api_key') || '';
             const googleKey = localStorage.getItem('google_api_key') || '';
