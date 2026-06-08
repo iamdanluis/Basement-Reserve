@@ -289,6 +289,25 @@
                     </button>
                 </div>
 
+                <!-- Gemini AI -->
+                <div class="border-t border-gray-800 pt-5 space-y-3">
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Gemini AI</h3>
+                        <p class="text-[11px] text-gray-500 mt-1">Powers label scanning, drinking window, critic scores and sommelier chat. Get a free key at aistudio.google.com/apikey</p>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Gemini API Key</label>
+                        <div class="flex gap-2">
+                            <input type="password" id="settings-gemini-key" placeholder="Paste your Gemini API key"
+                                class="flex-1 bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                            <button onclick="saveGeminiKey()" class="px-3 py-2 bg-gradient-to-r from-merlot-800 to-merlot-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+                    <div id="gemini-status-msg" class="hidden text-[11px] rounded-lg px-3 py-2"></div>
+                </div>
+
                 <!-- Guardian News -->
                 <div class="border-t border-gray-800 pt-5 space-y-3">
                     <div>
@@ -1528,8 +1547,49 @@
             saveToSupabase(); // sync to cloud in background
         }
 
-        // Claude API helper
-        async function callClaudeAPI(messages, systemPrompt, imageData) {
+        // ── Unified AI API (Gemini preferred, Claude fallback) ────────
+        async function callAI(messages, systemPrompt) {
+            const geminiKey = localStorage.getItem('gemini_api_key');
+            if (geminiKey) {
+                return await callGeminiAPI(messages, systemPrompt, geminiKey);
+            }
+            return await callAI(messages, systemPrompt);
+        }
+
+        async function callGeminiAPI(messages, systemPrompt, apiKey) {
+            const model = 'gemini-2.0-flash';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+            // Build Gemini contents from messages
+            const contents = messages.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: Array.isArray(m.content)
+                    ? m.content.map(c => c.type === 'text' ? { text: c.text } : { inlineData: { mimeType: c.source?.media_type, data: c.source?.data } })
+                    : [{ text: m.content }]
+            }));
+
+            const payload = {
+                system_instruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
+                contents,
+                generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const err = await response.json().catch(() => ({}));
+                throw new Error(err.error?.message || `Gemini API error ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function callClaudeAPI(messages, systemPrompt) {
             const payload = {
                 model: "claude-sonnet-4-20250514",
                 max_tokens: 1000,
@@ -1672,7 +1732,7 @@ Return ONLY the JSON. No markdown, no explanation.`
                 }];
 
                 const systemPrompt = "You are a master sommelier and wine label analyst. Return only valid JSON.";
-                const rawReply = await callClaudeAPI(messages, systemPrompt);
+                const rawReply = await callAI(messages, systemPrompt);
 
                 let parsed;
                 try {
@@ -1741,7 +1801,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
                     content: `What is the current retail market price and brief market overview for: ${winery} "${name}" ${vintage}? Include typical price range, critical reception if notable, and drinking window.`
                 }];
 
-                const reply = await callClaudeAPI(messages, systemPrompt);
+                const reply = await callAI(messages, systemPrompt);
                 let parsed;
                 try {
                     parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
@@ -2092,7 +2152,7 @@ Use HTML for formatting: <strong> for wine names, <br> for line breaks, &bull; f
 CURRENT CELLAR INVENTORY:
 ${inventoryContext}`;
 
-            callClaudeAPI(sommelierHistory, systemPrompt)
+            callAI(sommelierHistory, systemPrompt)
                 .then(reply => {
                     removeChatBubble(loaderId);
                     sommelierHistory.push({ role: "assistant", content: reply });
@@ -2683,7 +2743,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
                     content: `Analyze the drinking window for: ${winery} "${name}" ${vintage}. Type: ${type}. Grape: ${grape}. Region: ${region}.`
                 }];
 
-                const reply = await callClaudeAPI(messages, systemPrompt);
+                const reply = await callAI(messages, systemPrompt);
                 const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
 
                 const { status, windowStart, windowEnd, recommendation } = parsed;
@@ -2897,6 +2957,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             const githubRepo = localStorage.getItem('github_repo') || '';
             const githubToken = localStorage.getItem('github_token') || '';
             const e = (id) => document.getElementById(id);
+            if (e('settings-gemini-key')) e('settings-gemini-key').value = localStorage.getItem('gemini_api_key') || '';
             if (e('settings-supabase-key')) e('settings-supabase-key').value = localStorage.getItem('supabase_key') || '';
             if (e('settings-guardian-key')) e('settings-guardian-key').value = localStorage.getItem('guardian_api_key') || '';
             if (e('setting-ideal-temp')) e('setting-ideal-temp').value = localStorage.getItem('cellar_ideal_temp') || '55';
@@ -3025,6 +3086,14 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             `).join('');
         }
         // ─────────────────────────────────────────────────────────────
+
+        function saveGeminiKey() {
+            const key = document.getElementById('settings-gemini-key').value.trim();
+            if (!key) { showSettingsMsg('gemini-status-msg', 'Please enter your API key.', 'error'); return; }
+            localStorage.setItem('gemini_api_key', key);
+            saveSettingToSupabase('gemini_api_key', key);
+            showSettingsMsg('gemini-status-msg', '✓ Gemini key saved! AI features will now use Gemini.', 'success');
+        }
 
         function saveSupabaseKey() {
             const key = document.getElementById('settings-supabase-key').value.trim();
@@ -3547,7 +3616,7 @@ Current year is 2026. Return ONLY valid JSON.`;
 
                 try {
                     const messages = [{ role: "user", content: `Wine: ${w.winery} "${w.wineName}" ${w.vintage}. Type: ${w.wineType}. Grape: ${w.grapeVariety}. Region: ${w.region}.` }];
-                    const reply = await callClaudeAPI(messages, system);
+                    const reply = await callAI(messages, system);
                     const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
                     w.drinkStatus = parsed.status;
                     w.drinkWindowStart = parsed.windowStart;
@@ -3623,7 +3692,7 @@ Current year is 2026. Return ONLY valid JSON.`;
 Only include critics where you have confident knowledge of an actual score for this specific wine and vintage. If you have no reliable score data, return {"scores": [], "note": "No scores on record"}. Return ONLY valid JSON.`;
 
                 const messages = [{ role: "user", content: `Critic scores for: ${winery} "${wineName}" ${vintage}` }];
-                const reply = await callClaudeAPI(messages, system);
+                const reply = await callAI(messages, system);
                 const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
 
                 // Cache on wine object
@@ -3691,7 +3760,7 @@ Only include critics where you have confident knowledge of an actual score for t
                 const system = `You are a wine research assistant. Given a winery name, return ONLY a JSON object: {"url": "https://www.example.com"}. 
 The URL must be the winery's official website homepage. If you are not confident of the exact URL, return {"url": null}. No markdown, no explanation.`;
                 const messages = [{ role: "user", content: `What is the official website URL for the winery: "${winery}"${region ? ` located in ${region}` : ''}?` }];
-                const reply = await callClaudeAPI(messages, system);
+                const reply = await callAI(messages, system);
                 const parsed = JSON.parse(reply.replace(/```json|```/g, '').trim());
 
                 if (parsed.url) {
