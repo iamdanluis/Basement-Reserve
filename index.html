@@ -619,6 +619,25 @@
                         </div>
                     </div>
 
+                    <!-- Cellar History Widget -->
+                    <div class="bg-dark-800 rounded-2xl border border-merlot-950/20 shadow-lg overflow-hidden">
+                        <div class="p-5 flex items-center justify-between border-b border-gray-800/60">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-merlot-950/60 border border-merlot-700/40 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-gold-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div>
+                                    <h3 class="font-sans text-base font-bold text-white leading-tight">Cellar History</h3>
+                                    <p id="consumed-count-label" class="text-[10px] text-gray-400 mt-0.5">Wines you've enjoyed</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="consumed-empty" class="p-8 text-center">
+                            <p class="text-xs text-gray-500">Wines you mark as consumed will appear here with your tasting notes.</p>
+                        </div>
+                        <div id="consumed-list" class="hidden divide-y divide-gray-800/50"></div>
+                    </div>
+
                 </section>
 
                 <!-- Tab: Catalog Section -->
@@ -1080,11 +1099,17 @@
 
             <!-- Modal Bottom control footer -->
             <div class="px-6 py-4 bg-dark-900 border-t border-merlot-950/60 flex flex-wrap gap-3 items-center justify-between flex-shrink-0">
-                <button type="button" id="btn-delete-wine" onclick="deleteCurrentWine()" class="hidden px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/40 text-rose-400 rounded-xl text-xs font-bold transition-all">
-                    Remove Bottle
-                </button>
+                <div class="flex gap-2">
+                    <button type="button" id="btn-delete-wine" onclick="deleteCurrentWine()" class="hidden px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/40 text-rose-400 rounded-xl text-xs font-bold transition-all">
+                        Remove Bottle
+                    </button>
+                    <button type="button" id="btn-consume-wine" onclick="openConsumeModal()" class="hidden px-4 py-2.5 bg-green-950/20 hover:bg-green-950/40 border border-green-900/40 text-green-400 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Mark Consumed
+                    </button>
+                </div>
                 
-                <div class="flex items-center gap-2.5 ml-auto">
+                <div class="flex items-center gap-2.5">
                     <button type="button" onclick="closeAddWineModal()" class="px-4 py-2.5 border border-merlot-950/40 hover:bg-dark-900 text-gray-400 hover:text-white rounded-xl text-xs font-bold transition-all">
                         Cancel
                     </button>
@@ -1093,6 +1118,49 @@
                     </button>
                 </div>
             </div>
+    </div>
+
+    <!-- Consume Wine Modal -->
+    <div id="consume-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="bg-dark-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-md">
+            <div class="flex items-center justify-between p-5 border-b border-gray-800">
+                <div class="flex items-center gap-2">
+                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h3 class="font-sans text-base font-bold text-white">Mark as Consumed</h3>
+                </div>
+                <button onclick="closeConsumeModal()" class="text-gray-500 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p id="consume-wine-name" class="font-serif text-lg font-bold text-white"></p>
+                <div>
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Date Consumed</label>
+                    <input type="date" id="consume-date" class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Final Tasting Notes</label>
+                    <textarea id="consume-notes" rows="3" placeholder="How did it taste? Any final impressions..." class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50 resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Final Rating</label>
+                    <select id="consume-rating" class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-gray-300 focus:outline-none focus:border-gold-500/50">
+                        <option value="5">★★★★★ Outstanding</option>
+                        <option value="4">★★★★☆ Excellent</option>
+                        <option value="3">★★★☆☆ Good</option>
+                        <option value="2">★★☆☆☆ Average</option>
+                        <option value="1">★☆☆☆☆ Poor</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Occasion</label>
+                    <input type="text" id="consume-occasion" placeholder="e.g. Dinner with friends, Anniversary..." class="w-full bg-dark-800 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-gold-500/50">
+                </div>
+                <button onclick="confirmConsumeWine()" class="w-full py-3 bg-gradient-to-r from-green-900 to-green-700 hover:from-green-800 hover:to-green-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                    Archive to Cellar History
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1256,11 +1324,18 @@
 
         // Global database arrays
         let cellarInventory = [];
+        let consumedCellar = [];
         let confirmCallback = null;
 
         window.onload = async function() {
             // Pre-load Guardian key if not already set
             // Guardian key stored in localStorage via Settings
+            // Load consumed cellar
+            const storedConsumed = localStorage.getItem("basement_reserve_consumed");
+            if (storedConsumed) {
+                try { consumedCellar = JSON.parse(storedConsumed); } catch(e) { consumedCellar = []; }
+            }
+
             // Load settings from Supabase first (syncs API keys across devices)
             await loadSettingsFromSupabase();
 
@@ -1449,6 +1524,7 @@
 
         function saveToLocalStorage() {
             localStorage.setItem("basement_reserve_collection_2026", JSON.stringify(cellarInventory));
+            localStorage.setItem("basement_reserve_consumed", JSON.stringify(consumedCellar));
             saveToSupabase(); // sync to cloud in background
         }
 
@@ -1704,6 +1780,7 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
         function openAddWineModal() {
             resetDrinkWindow();
             resetScores();
+            hide('btn-consume-wine');
             document.getElementById('form-website').value = "";
             document.getElementById('modal-title').innerText = "Catalog New Bottle";
             document.getElementById('wine-form').reset();
@@ -1792,6 +1869,8 @@ Keep summary under 80 words. estimatedValue must be a number (USD retail price).
             }
 
             show('btn-delete-wine');
+            const _cbtn = document.getElementById('btn-consume-wine');
+            if (_cbtn) { _cbtn.classList.remove('hidden'); _cbtn.classList.add('flex'); }
             const _awm = document.getElementById('add-wine-modal'); if (_awm) { _awm.classList.remove('hidden'); }
         }
 
@@ -2230,6 +2309,7 @@ ${inventoryContext}`;
                 });
             }
             renderRTDCarousel();
+            renderConsumedHistory();
         }
 
         let catalogView = 'list';
@@ -2845,6 +2925,106 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             const input = document.getElementById('settings-govee-key');
             input.type = input.type === 'password' ? 'text' : 'password';
         }
+
+        // ── Consume Wine ──────────────────────────────────────────────
+        let consumingWineId = null;
+
+        function openConsumeModal() {
+            const id = document.getElementById('wine-id-field').value;
+            if (!id) return;
+            const wine = cellarInventory.find(w => w.id === id);
+            if (!wine) return;
+            consumingWineId = id;
+            document.getElementById('consume-wine-name').textContent = `${wine.winery} — ${wine.wineName} ${wine.vintage}`;
+            document.getElementById('consume-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('consume-notes').value = '';
+            document.getElementById('consume-occasion').value = '';
+            document.getElementById('consume-rating').value = wine.rating || '5';
+            const modal = document.getElementById('consume-modal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+        }
+
+        function closeConsumeModal() {
+            const modal = document.getElementById('consume-modal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+            consumingWineId = null;
+        }
+
+        function confirmConsumeWine() {
+            if (!consumingWineId) return;
+            const wine = cellarInventory.find(w => w.id === consumingWineId);
+            if (!wine) return;
+
+            const consumedEntry = {
+                ...wine,
+                consumedDate: document.getElementById('consume-date').value,
+                consumedNotes: document.getElementById('consume-notes').value,
+                consumedRating: document.getElementById('consume-rating').value,
+                consumedOccasion: document.getElementById('consume-occasion').value,
+                consumedAt: new Date().toISOString()
+            };
+
+            consumedCellar.unshift(consumedEntry);
+            cellarInventory = cellarInventory.filter(w => w.id !== consumingWineId);
+
+            saveToLocalStorage();
+            closeConsumeModal();
+            closeAddWineModal();
+            renderDashboard();
+            renderCatalog();
+            renderRackMatrix();
+            renderConsumedHistory();
+            showToast(`${wine.wineName} archived to Cellar History!`, 'success');
+        }
+
+        function renderConsumedHistory() {
+            const list = document.getElementById('consumed-list');
+            const empty = document.getElementById('consumed-empty');
+            const label = document.getElementById('consumed-count-label');
+
+            if (!list) return;
+
+            if (label) label.textContent = consumedCellar.length > 0
+                ? `${consumedCellar.length} bottle${consumedCellar.length !== 1 ? 's' : ''} enjoyed`
+                : "Wines you've enjoyed";
+
+            if (consumedCellar.length === 0) {
+                hide('consumed-list');
+                show('consumed-empty');
+                return;
+            }
+
+            hide('consumed-empty');
+            show('consumed-list');
+
+            const stars = (r) => '★'.repeat(parseInt(r)) + '☆'.repeat(5 - parseInt(r));
+            const typeColor = {
+                'Red': 'text-merlot-400', 'White': 'text-yellow-300',
+                'Sparkling': 'text-gold-400', 'Rosé': 'text-pink-400'
+            };
+
+            list.innerHTML = consumedCellar.map(w => `
+                <div class="p-4 hover:bg-dark-900/40 transition-colors">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <p class="font-serif font-bold text-white text-sm">${w.wineName}</p>
+                                <span class="text-[10px] font-semibold ${typeColor[w.wineType] || 'text-gray-400'}">${w.wineType}</span>
+                            </div>
+                            <p class="text-[11px] text-gray-500 mt-0.5">${w.winery} &bull; ${w.vintage}</p>
+                            ${w.consumedOccasion ? `<p class="text-[10px] text-gold-500 mt-1 italic">${w.consumedOccasion}</p>` : ''}
+                            ${w.consumedNotes ? `<p class="text-[11px] text-gray-400 mt-1.5 leading-relaxed">${w.consumedNotes}</p>` : ''}
+                        </div>
+                        <div class="text-right flex-shrink-0">
+                            <p class="text-[11px] text-gold-400">${stars(w.consumedRating || w.rating || 5)}</p>
+                            <p class="text-[10px] text-gray-600 mt-1">${w.consumedDate ? new Date(w.consumedDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : ''}</p>
+                            <p class="text-[10px] text-gray-700 mt-0.5">$${w.estimatedValue}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        // ─────────────────────────────────────────────────────────────
 
         function saveSupabaseKey() {
             const key = document.getElementById('settings-supabase-key').value.trim();
