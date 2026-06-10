@@ -3508,7 +3508,8 @@ Only include real upcoming events you can verify from the web. Return ONLY valid
             hide('govee-loading');
             show('govee-readings');
             show('govee-updated');
-            document.getElementById('govee-updated').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            const updEl = document.getElementById('govee-updated');
+            if (updEl) updEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
 
             // Update nav mini display
             const navWidget = document.getElementById('nav-cellar-conditions');
@@ -3525,7 +3526,7 @@ Only include real upcoming events you can verify from the web. Return ONLY valid
 
             // Temperature — use configurable thresholds
             if (tempF !== null) {
-                document.getElementById('govee-temp').textContent = `${tempF}°F`;
+                (document.getElementById('govee-temp') || {}).textContent = `${tempF}°F`;
                 const t = parseFloat(tempF);
                 const idealTemp = parseFloat(localStorage.getItem('cellar_ideal_temp') || '55');
                 const warnTempLow = parseFloat(localStorage.getItem('cellar_warn_temp_low') || '50');
@@ -3533,39 +3534,39 @@ Only include real upcoming events you can verify from the web. Return ONLY valid
                 let tColor, tLabel;
                 if (t >= idealTemp - 3 && t <= idealTemp + 3) {
                     tColor = 'bg-green-500'; tLabel = '✓ Ideal';
-                    document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-green-400';
+                    (document.getElementById('govee-temp-status') || {}).className = 'text-[10px] font-semibold text-green-400';
                 } else if (t >= warnTempLow && t <= warnTempHigh) {
                     tColor = 'bg-amber-500'; tLabel = t > idealTemp ? 'Slightly warm' : 'Slightly cool';
-                    document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-amber-400';
+                    (document.getElementById('govee-temp-status') || {}).className = 'text-[10px] font-semibold text-amber-400';
                 } else {
                     tColor = 'bg-rose-500'; tLabel = t > warnTempHigh ? '⚠ Too warm' : '⚠ Too cold';
-                    document.getElementById('govee-temp-status').className = 'text-[10px] font-semibold text-rose-400';
+                    (document.getElementById('govee-temp-status') || {}).className = 'text-[10px] font-semibold text-rose-400';
                 }
-                document.getElementById('govee-temp-status').textContent = tLabel;
-                document.getElementById('govee-temp-bar').className = `h-full rounded-full transition-all duration-700 ${tColor}`;
-                document.getElementById('govee-temp-bar').style.width = `${Math.min(100, (t / 100) * 100)}%`;
+                (document.getElementById('govee-temp-status') || {}).textContent = tLabel;
+                (document.getElementById('govee-temp-bar') || {}).className = `h-full rounded-full transition-all duration-700 ${tColor}`;
+                (document.getElementById('govee-temp-bar') || {}).style.width = `${Math.min(100, (t / 100) * 100)}%`;
             }
 
             // Humidity — use configurable thresholds
             if (humidityVal !== null) {
-                document.getElementById('govee-humidity').textContent = `${humidityVal}%`;
+                (document.getElementById('govee-humidity') || {}).textContent = `${humidityVal}%`;
                 const h = parseFloat(humidityVal);
                 const humidIdealLow = parseFloat(localStorage.getItem('cellar_humid_low') || '60');
                 const humidIdealHigh = parseFloat(localStorage.getItem('cellar_humid_high') || '70');
                 let hColor, hLabel;
                 if (h >= humidIdealLow && h <= humidIdealHigh) {
                     hColor = 'bg-green-500'; hLabel = '✓ Ideal';
-                    document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-green-400';
+                    (document.getElementById('govee-humidity-status') || {}).className = 'text-[10px] font-semibold text-green-400';
                 } else if (h >= humidIdealLow - 10 && h <= humidIdealHigh + 10) {
                     hColor = 'bg-amber-500'; hLabel = h < humidIdealLow ? 'Slightly dry' : 'Slightly humid';
-                    document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-amber-400';
+                    (document.getElementById('govee-humidity-status') || {}).className = 'text-[10px] font-semibold text-amber-400';
                 } else {
                     hColor = 'bg-rose-500'; hLabel = h < humidIdealLow - 10 ? '⚠ Too dry' : '⚠ Too humid';
-                    document.getElementById('govee-humidity-status').className = 'text-[10px] font-semibold text-rose-400';
+                    (document.getElementById('govee-humidity-status') || {}).className = 'text-[10px] font-semibold text-rose-400';
                 }
-                document.getElementById('govee-humidity-status').textContent = hLabel;
-                document.getElementById('govee-humidity-bar').className = `h-full rounded-full transition-all duration-700 ${hColor}`;
-                document.getElementById('govee-humidity-bar').style.width = `${Math.min(100, h)}%`;
+                (document.getElementById('govee-humidity-status') || {}).textContent = hLabel;
+                (document.getElementById('govee-humidity-bar') || {}).className = `h-full rounded-full transition-all duration-700 ${hColor}`;
+                (document.getElementById('govee-humidity-bar') || {}).style.width = `${Math.min(100, h)}%`;
             }
         }
 
@@ -3573,7 +3574,10 @@ Only include real upcoming events you can verify from the web. Return ONLY valid
             hide('govee-loading');
             hide('govee-readings');
             show('govee-error');
-            document.getElementById('govee-error-msg').textContent = msg;
+            const msgEl = document.getElementById('govee-error-msg');
+            if (msgEl) msgEl.textContent = msg;
+            const navWidget = document.getElementById('nav-cellar-conditions');
+            if (navWidget) navWidget.classList.add('hidden');
         }
         // ─────────────────────────────────────────────────────────────
 
