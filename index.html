@@ -3881,11 +3881,11 @@ The URL must be the winery's official website homepage. If you are not confident
                 setTimeout(() => toast.remove(), 300);
             }, 4000);
         }
-        // ── PWA Service Worker ────────────────────────────────────────
+        // Service worker disabled — was causing cache issues
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/Basement-Reserve/sw.js', { scope: '/Basement-Reserve/' })
-                .then(() => console.log('PWA: Service worker registered'))
-                .catch(e => console.log('PWA: SW registration failed:', e));
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                for (let r of registrations) r.unregister();
+            });
         }
         // ─────────────────────────────────────────────────────────────
     </script>
