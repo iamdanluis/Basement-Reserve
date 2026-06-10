@@ -1301,6 +1301,7 @@
         let confirmCallback = null;
 
         window.onload = async function() {
+            try {
             // Pre-load Guardian key if not already set
             // Guardian key stored in localStorage via Settings
             // Load consumed cellar
@@ -1365,8 +1366,11 @@
             // Show GitHub push button if already configured
             if (localStorage.getItem('github_token')) {
                 const btn = document.getElementById('btn-github-push');
-                btn.classList.remove('hidden');
-                btn.classList.add('flex');
+                if (btn) { btn.classList.remove('hidden'); btn.classList.add('flex'); }
+            }
+            } catch(err) {
+                console.error('App load error:', err);
+                try { renderDashboard(); renderCatalog(); renderRackMatrix(); } catch(e) {}
             }
         };
 
