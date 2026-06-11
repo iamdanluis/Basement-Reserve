@@ -27,20 +27,12 @@
         &quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23410a18'/><text y='72' x='50' text-anchor='middle' font-size='60'>🍷</text></svg>&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]
     }">
     
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS - pinned stable version -->
     <script>
-        // Suppress Tailwind CDN production warning
         const _warn = console.warn.bind(console);
         console.warn = (...args) => {
             if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
             _warn(...args);
-        };
-        // Suppress blocked remote CSS errors
-        const _error = console.error.bind(console);
-        console.error = (...args) => {
-            const msg = typeof args[0] === 'string' ? args[0] : '';
-            if (msg.includes('cssRules') || msg.includes('remote css') || msg.includes('remote stylesheet') || msg.includes('fonts.googleapis')) return;
-            _error(...args);
         };
     </script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -97,12 +89,41 @@
         }
     </script>
     <style>
-        /* Custom scrollbar styling for high-end boutique feel */
+        /* Critical color fallbacks — ensures page renders even if Tailwind custom colors fail */
+        .bg-dark-950 { background-color: #0b0506 !important; }
+        .bg-dark-900 { background-color: #120b0c !important; }
+        .bg-dark-850 { background-color: #150f10 !important; }
+        .bg-dark-800 { background-color: #1a1415 !important; }
+        .bg-dark-900\/40 { background-color: rgba(18,11,12,0.4) !important; }
+        .bg-dark-900\/60 { background-color: rgba(18,11,12,0.6) !important; }
+        .text-white { color: #ffffff !important; }
+        .text-gray-100 { color: #f3f4f6 !important; }
+        .text-gray-300 { color: #d1d5db !important; }
+        .text-gray-400 { color: #9ca3af !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-gold-400 { color: #cfb864 !important; }
+        .text-gold-500 { color: #c0a041 !important; }
+        .text-merlot-400 { color: #e7758f !important; }
+        .border-merlot-950 { border-color: #410a18 !important; }
+        .border-merlot-900\/30 { border-color: rgba(113,26,48,0.3) !important; }
+        .border-gray-800 { border-color: #1f2937 !important; }
+        .bg-merlot-950 { background-color: #410a18 !important; }
+        .bg-merlot-900 { background-color: #711a30 !important; }
+        .bg-merlot-800 { background-color: #851c36 !important; }
+        .bg-merlot-600 { background-color: #be3053 !important; }
+        .from-dark-900 { --tw-gradient-from: #120b0c !important; }
+        .to-dark-950 { --tw-gradient-to: #0b0506 !important; }
+        .from-merlot-800 { --tw-gradient-from: #851c36 !important; }
+        .to-merlot-600 { --tw-gradient-to: #be3053 !important; }
+        body { background-color: #0b0506; color: #f3f4f6; }
+
+        /* Custom scrollbar styling */
         @media (min-width: 768px) {
             #add-wine-modal > div {
                 height: auto !important;
             }
         }
+        ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
         }
