@@ -529,19 +529,19 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
 
 /* Responsive */
 @media (min-width: 640px) {
-  .sm\:flex { display: flex; }
-  .sm\:hidden { display: none; }
-  .sm\:inline { display: inline; }
-  .sm\:table-cell { display: table-cell; }
+  .sm\:flex { display: flex !important; }
+  .sm\:hidden { display: none !important; }
+  .sm\:inline { display: inline !important; }
+  .sm\:table-cell { display: table-cell !important; }
   .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .sm\:text-base { font-size: 1rem; line-height: 1.5rem; }
   .sm\:p-6 { padding: 1.5rem; }
 }
 @media (min-width: 768px) {
-  .md\:flex { display: flex; }
-  .md\:hidden { display: none; }
-  .md\:block { display: block; }
-  .md\:inline { display: inline; }
+  .md\:flex { display: flex !important; }
+  .md\:hidden { display: none !important; }
+  .md\:block { display: block !important; }
+  .md\:inline { display: inline !important; }
   .md\:table-cell { display: table-cell; }
   .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -559,10 +559,10 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
   #add-wine-modal > div { height: auto !important; }
 }
 @media (min-width: 1024px) {
-  .lg\:flex { display: flex; }
-  .lg\:hidden { display: none; }
-  .lg\:block { display: block; }
-  .lg\:table-cell { display: table-cell; }
+  .lg\:flex { display: flex !important; }
+  .lg\:hidden { display: none !important; }
+  .lg\:block { display: block !important; }
+  .lg\:table-cell { display: table-cell !important; }
   .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lg\:max-w-none { max-width: none; }
   .lg\:p-10 { padding: 2.5rem; }
@@ -579,10 +579,11 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
     </script>
 </head>
 <body class="h-full text-gray-100 flex flex-col font-sans overflow-hidden bg-dark-950">
-    <div id="loading-screen" style="position:fixed;inset:0;background:#0b0506;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px">
-        <div style="color:#cfb864;font-size:2rem">🍷</div>
-        <div style="color:#d1d5db;font-size:14px;font-family:sans-serif">Loading Basement Reserve...</div>
-        <div id="load-status" style="color:#6b7280;font-size:11px;font-family:monospace">Initializing...</div>
+    <div id="loading-screen" style="position:fixed;inset:0;background:#0b0506;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px;font-family:sans-serif">
+        <div style="font-size:2.5rem">🍷</div>
+        <div style="color:#d1d5db;font-size:15px;font-weight:600">Basement Reserve</div>
+        <div style="color:#9ca3af;font-size:12px">Loading your cellar...</div>
+        <div id="load-status" style="color:#6b7280;font-size:11px;margin-top:8px">Starting up...</div>
     </div>
 
     <!-- Toast system wrapper -->
