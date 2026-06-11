@@ -579,6 +579,11 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
     </script>
 </head>
 <body class="h-full text-gray-100 flex flex-col font-sans overflow-hidden bg-dark-950">
+    <div id="loading-screen" style="position:fixed;inset:0;background:#0b0506;display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px">
+        <div style="color:#cfb864;font-size:2rem">🍷</div>
+        <div style="color:#d1d5db;font-size:14px;font-family:sans-serif">Loading Basement Reserve...</div>
+        <div id="load-status" style="color:#6b7280;font-size:11px;font-family:monospace">Initializing...</div>
+    </div>
 
     <!-- Toast system wrapper -->
     <div id="toast-wrapper" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
@@ -1754,7 +1759,9 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
         let confirmCallback = null;
 
         window.onload = async function() {
+            const setStatus = (msg) => { const el = document.getElementById('load-status'); if (el) el.textContent = msg; };
             try {
+                setStatus('Loading consumed cellar...');
             // Pre-load Guardian key if not already set
             // Guardian key stored in localStorage via Settings
             // Load consumed cellar
@@ -1809,12 +1816,17 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
             };
 
             // Build interfaces
+            setStatus('Rendering dashboard...');
             renderDashboard();
             renderCatalog();
             renderRackMatrix();
             initGovee();
             autoAssignAllUnassigned();
             fetchWineNews();
+
+            // Hide loading screen
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) loadingScreen.style.display = 'none';
 
             // Show GitHub push button if already configured
             if (localStorage.getItem('github_token')) {
@@ -1823,7 +1835,8 @@ body { background: var(--dark-950); color: #f3f4f6; display: flex; flex-directio
             }
             } catch(err) {
                 console.error('App load error:', err);
-                console.error('LOAD FAILED:', err.message, err.stack);
+                const loadStatus = document.getElementById('load-status');
+                if (loadStatus) loadStatus.textContent = 'Error: ' + err.message;
             }
         };
 
