@@ -27,9 +27,10 @@
         &quot;icons&quot;:[{&quot;src&quot;:&quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23410a18'/><text y='72' x='50' text-anchor='middle' font-size='60'>🍷</text></svg>&quot;,&quot;sizes&quot;:&quot;any&quot;,&quot;type&quot;:&quot;image/svg+xml&quot;}]
     }">
     
-    <!-- Tailwind CSS — config before CDN so custom colors load -->
+    <!-- Tailwind CSS — CDN first, then config -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind = { config: {
+        tailwind.config = {
             theme: {
                 extend: {
                     colors: {
@@ -71,9 +72,8 @@
                     }
                 }
             }
-        } };
+        }
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google Fonts -->
     <style>
