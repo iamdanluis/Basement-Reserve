@@ -612,6 +612,39 @@
                         <div id="consumed-list" class="hidden divide-y divide-gray-800/50"></div>
                     </div>
 
+                    <!-- Value Finds Widget -->
+                    <div class="bg-dark-800 rounded-2xl border border-gold-950 shadow-lg overflow-hidden">
+                        <button onclick="toggleValueFinds()" class="w-full p-5 flex items-center justify-between hover:bg-dark-900/40 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gold-950/20 border border-gold-800/30 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-gold-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </div>
+                                <div class="text-left">
+                                    <h3 class="font-sans text-base font-bold text-white leading-tight">Value Finds</h3>
+                                    <p id="value-finds-count-label" class="text-[10px] text-gray-400 mt-0.5">Great wines under $30</p>
+                                </div>
+                            </div>
+                            <svg id="value-finds-chevron" class="w-4 h-4 text-gray-500 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <!-- Collapsed content -->
+                        <div id="value-finds-content" class="hidden border-t border-gray-800/60">
+                            <!-- Scan button -->
+                            <div class="p-4 border-b border-gray-800/40">
+                                <button onclick="openValueFindScanner()" class="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-merlot-800 to-merlot-600 hover:from-merlot-700 hover:to-merlot-500 text-white rounded-xl text-xs font-bold border border-gold-500/20 transition-all active:scale-95">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
+                                    Scan a Bottle
+                                </button>
+                            </div>
+
+                            <!-- Finds list -->
+                            <div id="value-finds-empty" class="p-8 text-center">
+                                <p class="text-xs text-gray-500">Scan a bottle label to save great value wines you discover.</p>
+                            </div>
+                            <div id="value-finds-list" class="hidden divide-y divide-gray-800/50 max-h-96 overflow-y-auto"></div>
+                        </div>
+                    </div>
+
                 </section>
 
                 <!-- Tab: Catalog Section -->
@@ -1137,6 +1170,72 @@
         </div>
     </div>
 
+    <!-- Value Find Scanner Modal -->
+    <div id="value-find-modal" class="hidden fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/80 backdrop-blur-md">
+        <div class="bg-dark-850 rounded-t-3xl md:rounded-3xl border border-merlot-900/30 w-full md:max-w-lg shadow-2xl flex flex-col" style="max-height:90vh;padding-bottom:env(safe-area-inset-bottom)">
+            <div class="flex justify-center pt-3 pb-1 md:hidden flex-shrink-0">
+                <div class="w-10 h-1 rounded-full bg-gray-700"></div>
+            </div>
+            <div class="px-6 py-4 bg-dark-900 border-b border-merlot-950/60 flex justify-between items-center flex-shrink-0">
+                <h3 class="font-serif text-lg font-bold text-white">Scan Value Find</h3>
+                <button onclick="closeValueFindModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="flex-grow overflow-y-auto p-6 space-y-4">
+                <div id="vf-photo-area" class="border-2 border-dashed border-merlot-950/40 rounded-xl p-6 text-center cursor-pointer hover:border-gold-500/30 transition-colors" onclick="document.getElementById('vf-photo-input').click()">
+                    <input type="file" id="vf-photo-input" accept="image/*" capture="environment" class="hidden" onchange="handleValueFindPhoto(event)">
+                    <div id="vf-photo-placeholder">
+                        <svg class="w-10 h-10 text-gray-600 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3"/></svg>
+                        <p class="text-sm text-gray-400 font-medium">Tap to photograph the label</p>
+                        <p class="text-xs text-gray-600 mt-1">Gemini will identify the wine automatically</p>
+                    </div>
+                    <img id="vf-photo-preview" class="hidden max-h-40 mx-auto rounded-lg object-contain">
+                </div>
+                <div id="vf-scanning" class="hidden flex items-center gap-2 text-xs text-gray-400">
+                    <svg class="w-4 h-4 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                    Analyzing label with Gemini...
+                </div>
+                <div id="vf-details" class="hidden space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Wine Name</label>
+                            <input type="text" id="vf-name" class="w-full bg-dark-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Winery</label>
+                            <input type="text" id="vf-winery" class="w-full bg-dark-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Vintage</label>
+                            <input type="text" id="vf-vintage" class="w-full bg-dark-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Price ($)</label>
+                            <input type="number" id="vf-price" class="w-full bg-dark-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500/50">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Why it's a great value</label>
+                        <textarea id="vf-notes" rows="2" class="w-full bg-dark-900 border border-gray-700 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-gold-500/50 resize-none" placeholder="Tastes like a $60 wine..."></textarea>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-1.5 block">Where to buy</label>
+                        <div id="vf-where-loading" class="hidden flex items-center gap-2 text-xs text-gray-500 py-1">
+                            <svg class="w-3 h-3 animate-spin text-gold-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                            Searching Seattle retailers...
+                        </div>
+                        <div id="vf-where" class="space-y-1.5"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-dark-900 border-t border-merlot-950/60 flex gap-3 flex-shrink-0">
+                <button onclick="closeValueFindModal()" class="flex-1 py-2.5 border border-gray-700 text-gray-400 rounded-xl text-xs font-bold">Cancel</button>
+                <button onclick="saveValueFind()" id="vf-save-btn" class="hidden flex-1 py-2.5 bg-gradient-to-r from-merlot-800 to-merlot-600 text-white rounded-xl text-xs font-bold border border-gold-500/20 transition-all active:scale-95">Save Find</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Real-world boutique Oregon collection mapped to your provided images
         const defaultWineSeed = [
@@ -1363,6 +1462,7 @@
             initGovee();
             autoAssignAllUnassigned();
             fetchWineNews();
+            updateValueFindsCount();
 
             // Show GitHub push button if already configured
             if (localStorage.getItem('github_token')) {
@@ -3065,6 +3165,214 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             localStorage.setItem('supabase_key', key);
             showSettingsMsg('supabase-status-msg', '✓ Supabase key saved! Reload to sync.', 'success');
         }
+
+        // ── Value Finds ───────────────────────────────────────────────
+        let valueFindsList = JSON.parse(localStorage.getItem('value_finds') || '[]');
+
+        function toggleValueFinds() {
+            const content = document.getElementById('value-finds-content');
+            const chevron = document.getElementById('value-finds-chevron');
+            const isOpen = !content.classList.contains('hidden');
+            if (isOpen) {
+                content.classList.add('hidden');
+                chevron.style.transform = '';
+            } else {
+                content.classList.remove('hidden');
+                chevron.style.transform = 'rotate(180deg)';
+                renderValueFinds();
+            }
+        }
+
+        function openValueFindScanner() {
+            const modal = document.getElementById('value-find-modal');
+            if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+            // Reset form
+            hide('vf-scanning'); hide('vf-details'); hide('vf-save-btn');
+            document.getElementById('vf-photo-placeholder').classList.remove('hidden');
+            document.getElementById('vf-photo-preview').classList.add('hidden');
+            document.getElementById('vf-photo-input').value = '';
+            ['vf-name','vf-winery','vf-vintage','vf-price','vf-notes'].forEach(id => {
+                const el = document.getElementById(id); if (el) el.value = '';
+            });
+            document.getElementById('vf-where').innerHTML = '';
+        }
+
+        function closeValueFindModal() {
+            const modal = document.getElementById('value-find-modal');
+            if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+        }
+
+        async function handleValueFindPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const preview = document.getElementById('vf-photo-preview');
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                document.getElementById('vf-photo-placeholder').classList.add('hidden');
+
+                // Scan with Gemini
+                show('vf-scanning');
+                const base64 = e.target.result.split(',')[1];
+                const mimeType = file.type;
+
+                try {
+                    const geminiKey = localStorage.getItem('gemini_api_key');
+                    if (!geminiKey) { hide('vf-scanning'); showToast('Add your Gemini key in Settings first.', 'error'); return; }
+
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+                    const payload = {
+                        contents: [{
+                            parts: [
+                                { inline_data: { mime_type: mimeType, data: base64 } },
+                                { text: `Analyze this wine label and return ONLY a JSON object with these fields:
+{
+  "wineName": "full wine name",
+  "winery": "winery/producer name",
+  "vintage": "year as string",
+  "grapeVariety": "grape variety",
+  "region": "region/appellation",
+  "estimatedRetailPrice": approximate retail price as number,
+  "valueNote": "one sentence on why this might be a great value wine (if it is)"
+}
+Return ONLY valid JSON, no markdown.` }
+                            ]
+                        }],
+                        generationConfig: { maxOutputTokens: 500 }
+                    };
+
+                    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!res.ok) throw new Error(`Gemini error ${res.status}`);
+                    const data = await res.json();
+                    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    const wine = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+                    // Fill form
+                    if (document.getElementById('vf-name')) document.getElementById('vf-name').value = wine.wineName || '';
+                    if (document.getElementById('vf-winery')) document.getElementById('vf-winery').value = wine.winery || '';
+                    if (document.getElementById('vf-vintage')) document.getElementById('vf-vintage').value = wine.vintage || '';
+                    if (document.getElementById('vf-price')) document.getElementById('vf-price').value = wine.estimatedRetailPrice || '';
+                    if (document.getElementById('vf-notes')) document.getElementById('vf-notes').value = wine.valueNote || '';
+
+                    hide('vf-scanning');
+                    show('vf-details');
+                    const saveBtn = document.getElementById('vf-save-btn');
+                    if (saveBtn) { saveBtn.classList.remove('hidden'); saveBtn.classList.add('flex'); }
+
+                    // Search where to buy
+                    searchWhereToBuy(wine.wineName, wine.winery, wine.vintage);
+
+                } catch (err) {
+                    hide('vf-scanning');
+                    showToast('Could not scan label: ' + err.message, 'error');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function searchWhereToBuy(wineName, winery, vintage) {
+            const geminiKey = localStorage.getItem('gemini_api_key');
+            if (!geminiKey) return;
+
+            show('vf-where-loading');
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
+                const payload = {
+                    contents: [{ parts: [{ text: `Where can someone buy "${winery} ${wineName} ${vintage}" in Seattle, WA or online? Search for current availability. Return ONLY a JSON array of up to 5 sources:
+[{ "store": "store name", "location": "Seattle neighborhood or 'Online'", "url": "website url or null", "note": "brief note like 'ships to WA' or 'in-store only'" }]
+Only include real, verifiable retailers. Return ONLY valid JSON.` }] }],
+                    tools: [{ google_search: {} }],
+                    generationConfig: { maxOutputTokens: 500 }
+                };
+
+                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                const sources = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+                hide('vf-where-loading');
+                const whereEl = document.getElementById('vf-where');
+                if (whereEl && sources.length > 0) {
+                    whereEl.innerHTML = sources.map(s => `
+                        <div class="${s.url ? 'cursor-pointer hover:bg-dark-700/40' : ''} bg-dark-900/60 rounded-lg p-2.5 border border-gray-800/60 transition-colors flex items-center justify-between gap-2"
+                            ${s.url ? `onclick="window.open('${s.url}', '_blank')"` : ''}>
+                            <div>
+                                <p class="text-[11px] font-semibold text-white">${s.store}</p>
+                                <p class="text-[10px] text-gray-500">${s.location}${s.note ? ' · ' + s.note : ''}</p>
+                            </div>
+                            ${s.url ? '<svg class="w-3 h-3 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>' : ''}
+                        </div>`).join('');
+                }
+            } catch (err) {
+                hide('vf-where-loading');
+                console.warn('Where to buy search failed:', err.message);
+            }
+        }
+
+        function saveValueFind() {
+            const find = {
+                id: 'vf_' + Date.now(),
+                wineName: document.getElementById('vf-name')?.value || '',
+                winery: document.getElementById('vf-winery')?.value || '',
+                vintage: document.getElementById('vf-vintage')?.value || '',
+                price: document.getElementById('vf-price')?.value || '',
+                notes: document.getElementById('vf-notes')?.value || '',
+                photo: document.getElementById('vf-photo-preview')?.src || '',
+                savedAt: new Date().toISOString()
+            };
+            if (!find.wineName) { showToast('Please enter a wine name.', 'error'); return; }
+            valueFindsList.unshift(find);
+            localStorage.setItem('value_finds', JSON.stringify(valueFindsList));
+            closeValueFindModal();
+            renderValueFinds();
+            updateValueFindsCount();
+            showToast(`${find.wineName} saved to Value Finds!`, 'success');
+        }
+
+        function renderValueFinds() {
+            const list = document.getElementById('value-finds-list');
+            const empty = document.getElementById('value-finds-empty');
+            if (!list) return;
+            if (valueFindsList.length === 0) {
+                hide('value-finds-list'); show('value-finds-empty'); return;
+            }
+            hide('value-finds-empty'); show('value-finds-list');
+            list.innerHTML = valueFindsList.map(f => `
+                <div class="p-4 hover:bg-dark-900/40 transition-colors">
+                    <div class="flex items-start gap-3">
+                        ${f.photo ? `<img src="${f.photo}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-gray-800">` : '<div class="w-12 h-12 rounded-lg bg-merlot-950/40 flex items-center justify-center flex-shrink-0 border border-merlot-900/30"><svg class="w-5 h-5 text-merlot-700" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>'}
+                        <div class="flex-1 min-w-0">
+                            <p class="font-serif font-bold text-white text-sm truncate">${f.wineName}</p>
+                            <p class="text-[11px] text-gray-500">${f.winery}${f.vintage ? ' · ' + f.vintage : ''}${f.price ? ' · $' + f.price : ''}</p>
+                            ${f.notes ? `<p class="text-[11px] text-gold-400/80 mt-1 italic leading-relaxed">${f.notes}</p>` : ''}
+                        </div>
+                        <button onclick="removeValueFind('${f.id}')" class="text-gray-700 hover:text-rose-400 transition-colors flex-shrink-0 p-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function removeValueFind(id) {
+            valueFindsList = valueFindsList.filter(f => f.id !== id);
+            localStorage.setItem('value_finds', JSON.stringify(valueFindsList));
+            renderValueFinds();
+            updateValueFindsCount();
+        }
+
+        function updateValueFindsCount() {
+            const label = document.getElementById('value-finds-count-label');
+            if (label) {
+                label.textContent = valueFindsList.length > 0
+                    ? `${valueFindsList.length} find${valueFindsList.length !== 1 ? 's' : ''} saved`
+                    : 'Great wines under $30';
+            }
+        }
+        // ─────────────────────────────────────────────────────────────
 
         function saveCellarThresholds() {
             const idealTemp = document.getElementById('setting-ideal-temp').value;
