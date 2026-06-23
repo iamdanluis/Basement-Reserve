@@ -1512,89 +1512,41 @@
         }
 
         // ── Unified AI API (Gemini preferred, Claude fallback) ────────
+        const PROXY_URL = 'https://basement-reserve-proxy.darranaga.workers.dev';
+
         async function callAI(messages, systemPrompt) {
             return await callClaudeAPI(messages, systemPrompt);
         }
 
-        async function callGeminiAPI(messages, systemPrompt, apiKey) {
-            const model = 'gemini-2.0-flash';
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        async function callClaudeAPI(messages, systemPrompt) {
+            // Extract image from messages if present
+            let image = null;
+            for (const msg of messages) {
+                if (Array.isArray(msg.content)) {
+                    const imgBlock = msg.content.find(b => b.type === 'image');
+                    if (imgBlock?.source?.data) {
+                        image = { data: imgBlock.source.data, mediaType: imgBlock.source.media_type };
+                    }
+                }
+            }
 
-            // Build Gemini contents from messages
-            const contents = messages.map(m => ({
-                role: m.role === 'assistant' ? 'model' : 'user',
-                parts: Array.isArray(m.content)
-                    ? m.content.map(c => c.type === 'text' ? { text: c.text } : { inlineData: { mimeType: c.source?.media_type, data: c.source?.data } })
-                    : [{ text: m.content }]
-            }));
-
-            const payload = {
-                system_instruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
-                contents,
-                generationConfig: { maxOutputTokens: 1000, temperature: 0.7 }
-            };
-
-            const response = await fetch(url, {
+            const response = await fetch(PROXY_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ system: systemPrompt, messages, image })
             });
 
             if (!response.ok) {
                 const err = await response.json().catch(() => ({}));
-                throw new Error(err.error?.message || `Gemini API error ${response.status}`);
+                throw new Error(err.error || `API error ${response.status}`);
             }
 
             const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        }
-
-        async function callClaudeAPI(messages, systemPrompt) {
-            const payload = {
-                model: "claude-sonnet-4-20250514",
-                max_tokens: 1000,
-                system: systemPrompt,
-                messages: messages
-            };
-
-            const response = await fetch("https://api.anthropic.com/v1/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error?.message || `API error ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.content.map(b => b.text || "").filter(Boolean).join("\n");
+            return data.content?.map(b => b.text || '').filter(Boolean).join('\n') || '';
         }
 
         async function callClaudeWithWebSearch(messages, systemPrompt) {
-            const payload = {
-                model: "claude-sonnet-4-20250514",
-                max_tokens: 1500,
-                system: systemPrompt,
-                messages: messages,
-                tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 5 }]
-            };
-
-            const response = await fetch("https://api.anthropic.com/v1/messages", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.error?.message || `API error ${response.status}`);
-            }
-
-            const data = await response.json();
-            // Extract only text blocks, skip server_tool_use and web_search_tool_result blocks
-            return data.content.filter(b => b.type === 'text').map(b => b.text || "").join("\n");
+            return await callClaudeAPI(messages, systemPrompt);
         }
 
         function triggerFileInput() {
