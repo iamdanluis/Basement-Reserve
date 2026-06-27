@@ -2777,6 +2777,7 @@ Current year is 2026. windowStart and windowEnd must be integers. Return ONLY va
             cellarInventory = cellarInventory.filter(w => w.id !== consumingWineId);
 
             saveToLocalStorage();
+            deleteFromSupabase(consumingWineId); // remove from Supabase too
             closeConsumeModal();
             closeAddWineModal();
             renderDashboard();
